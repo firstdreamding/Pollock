@@ -7,7 +7,7 @@
 
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include<string>
+#include <string>
 
 class ParticleEditor
 {
@@ -20,7 +20,7 @@ public:
 
 	void AddParticleSystem();
 private:
-	std::vector<std::shared_ptr<ParticleSystem>> m_ParticleSystems;
-	std::vector<std::shared_ptr<ParticleProperties>> m_Particles;
+	std::vector<ParticleInstance> m_ParticleInstances;
+
 	int m_index = -1;
 };

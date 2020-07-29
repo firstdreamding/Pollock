@@ -1,5 +1,7 @@
 #include "ParticleEditor.h"
 
+#include "Pollock/ParticleSerializer.h"
+
 ParticleEditor::ParticleEditor()
 {
 	 
@@ -11,10 +13,10 @@ ParticleEditor::~ParticleEditor()
 
 void ParticleEditor::OnUpdate(float ts)
 {
-	for (int i = 0; i < m_ParticleSystems.size(); i++)
+	for (int i = 0; i < m_ParticleInstances.size(); i++)
 	{
-		m_ParticleSystems[i]->Emit(*m_Particles[i]);
-		m_ParticleSystems[i]->OnUpdate(ts, i == m_index);
+		m_ParticleInstances[i].System->Emit(*m_ParticleInstances[i].Properties);
+		m_ParticleInstances[i].System->OnUpdate(ts, i == m_index);
 	}
 }
 
@@ -32,9 +34,9 @@ void ParticleEditor::OnImGuiDraw()
 	if (ImGui::CollapsingHeader("Active Particle Systems"))
 	{
 		ImGui::Indent();
-		for (int i = 0; i < m_ParticleSystems.size(); i++) {
+		for (int i = 0; i < m_ParticleInstances.size(); i++) {
 			ImGui::PushID(i);
-			if (ImGui::Button(m_ParticleSystems[i]->Name)) {
+			if (ImGui::Button(m_ParticleInstances[i].System->Name)) {
 				m_index = i;
 			}
 			ImGui::PopID();
@@ -46,27 +48,26 @@ void ParticleEditor::OnImGuiDraw()
 
 	if (m_index != -1)
 	{
-		ImGui::InputText("Particle Name", m_ParticleSystems[m_index]->Name, IM_ARRAYSIZE(m_ParticleSystems[m_index]->Name));
-		ImGui::DragFloat2("Position", glm::value_ptr(m_Particles[m_index]->Position), 0.05f);
+		ImGui::InputText("Particle Name", m_ParticleInstances[m_index].System->Name, IM_ARRAYSIZE(m_ParticleInstances[m_index].System->Name));
+		ImGui::DragFloat2("Position", glm::value_ptr(m_ParticleInstances[m_index].Properties->Position), 0.05f);
 
-		ImGui::DragFloat2("Velocity", glm::value_ptr(m_Particles[m_index]->Velocity), 0.05f);
-		ImGui::DragFloat2("Velocity Variation", glm::value_ptr(m_Particles[m_index]->VelocityVariation), 0.05f);
+		ImGui::DragFloat2("Velocity", glm::value_ptr(m_ParticleInstances[m_index].Properties->Velocity), 0.05f);
+		ImGui::DragFloat2("Velocity Variation", glm::value_ptr(m_ParticleInstances[m_index].Properties->VelocityVariation), 0.05f);
 
-		ImGui::ColorEdit4("Birth Color", glm::value_ptr(m_Particles[m_index]->BirthColor));
-		ImGui::ColorEdit4("Death Color", glm::value_ptr(m_Particles[m_index]->DeathColor));
+		ImGui::ColorEdit4("Birth Color", glm::value_ptr(m_ParticleInstances[m_index].Properties->BirthColor));
+		ImGui::ColorEdit4("Death Color", glm::value_ptr(m_ParticleInstances[m_index].Properties->DeathColor));
 
-		ImGui::DragFloat("Birth Size", &m_Particles[m_index]->BirthSize, 0.02f);
-		ImGui::DragFloat("Birth Size Variation", &m_Particles[m_index]->BirthSizeVariation, 0.02f);
-		ImGui::DragFloat("Death Size", &m_Particles[m_index]->DeathSize, 0.02f);
-		ImGui::DragFloat("Death Size Variation", &m_Particles[m_index]->DeathSizeVariation, 0.02f);
+		ImGui::DragFloat("Birth Size", &m_ParticleInstances[m_index].Properties->BirthSize, 0.02f);
+		ImGui::DragFloat("Birth Size Variation", &m_ParticleInstances[m_index].Properties->BirthSizeVariation, 0.02f);
+		ImGui::DragFloat("Death Size", &m_ParticleInstances[m_index].Properties->DeathSize, 0.02f);
+		ImGui::DragFloat("Death Size Variation", &m_ParticleInstances[m_index].Properties->DeathSizeVariation, 0.02f);
 
-		ImGui::DragFloat("Rotation Speed", &m_Particles[m_index]->RotationSpeed);
-		ImGui::DragFloat("Rotation Variation", &m_Particles[m_index]->RotationVariation);
-		ImGui::DragFloat("Rotation Speed Variation", &m_Particles[m_index]->RotationSpeedVariation);
+		ImGui::DragFloat("Rotation Speed", &m_ParticleInstances[m_index].Properties->RotationSpeed);
+		ImGui::DragFloat("Rotation Variation", &m_ParticleInstances[m_index].Properties->RotationVariation);
+		ImGui::DragFloat("Rotation Speed Variation", &m_ParticleInstances[m_index].Properties->RotationSpeedVariation);
 
-		ImGui::DragFloat("Life Span", &m_Particles[m_index]->LifeSpan);
-		ImGui::DragFloat("Life Span Variation", &m_Particles[m_index]->LifeSpanVariation);
-
+		ImGui::DragFloat("Life Span", &m_ParticleInstances[m_index].Properties->LifeSpan);
+		ImGui::DragFloat("Life Span Variation", &m_ParticleInstances[m_index].Properties->LifeSpanVariation);
 	}
 
 	//ImGui::DragInt("Emission Rate", &s_EmissionRate, 1, 0, 100);
@@ -87,13 +88,20 @@ void ParticleEditor::OnImGuiDraw()
 	}
 	*/
 
+	if (ImGui::Button("Save"))
+	{
+		std::string filename = "ParticleEditorTest.particle";
+
+		ParticleSerializer serializer;
+		serializer.Serialize(filename, m_ParticleInstances);
+	}
+
+
 	ImGui::End();
 }
 
 void ParticleEditor::AddParticleSystem()
 {
-	m_ParticleSystems.push_back(std::make_shared<ParticleSystem>());
-
 	ParticleProperties defaultParticle;
 	defaultParticle.Position = { 0.0f, 0.0f };
 	defaultParticle.Velocity = { 0.0f, 4.0f };
@@ -110,6 +118,6 @@ void ParticleEditor::AddParticleSystem()
 	defaultParticle.LifeSpan = 1.0f;
 	defaultParticle.LifeSpanVariation = 1.0f;
 
-	m_Particles.push_back(std::make_shared<ParticleProperties>(defaultParticle));
-	m_index = m_Particles.size() - 1;
+	m_ParticleInstances.push_back({ std::make_shared<ParticleSystem>(), std::make_shared<ParticleProperties>(defaultParticle) });
+	m_index = m_ParticleInstances.size() - 1;
 }
