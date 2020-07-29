@@ -47,3 +47,9 @@ private:
 	std::vector<Particle> m_ParticlePool; // 100,000
 	uint32_t m_ParticlePoolIndex = 0;
 };
+
+struct ParticleInstance
+{
+	std::shared_ptr<ParticleSystem> System;
+	std::shared_ptr<ParticleProperties> Properties;
+};
