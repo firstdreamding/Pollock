@@ -97,6 +97,8 @@ private:
 };
 
 static Window* window;
+static Camera camera(-1.6f, 1.6f, -1.0f, 1.0f);
+static float cameraZoom = 1.0f;
 
 YAML::Emitter& operator << (YAML::Emitter& out, const glm::vec2& v)
 {
@@ -198,9 +200,6 @@ namespace YAML {
 static void SetCameraProjection(Camera& camera, uint32_t width, uint32_t height, float zoom)
 {
 	float aspectRatio = (float)width / (float)height; // 1.78
-
-	float w = width / 1280.0f; // 1.0f
-	float h = height / 720.0f; // 1.0f
 	float multiplier = zoom;
 
 	glm::mat4 projection = glm::ortho(-aspectRatio * multiplier, aspectRatio * multiplier, -1.0f * multiplier, 1.0f * multiplier);
@@ -381,11 +380,36 @@ static void DrawImGuiStatsPanel()
 	ImGui::End();
 }
 
+static float s_ViewportWidth = 0.0f, s_ViewportHeight = 0.0f;
+
+std::vector<std::function<void()>> m_PostRenderQueue;
+
+bool s_NeedsResize = false;
+
+static void ResizeIfNeeded(uint32_t width, uint32_t height)
+{
+	if (s_ViewportWidth == width && s_ViewportHeight == height)
+		return;
+
+	s_ViewportWidth = width;
+	s_ViewportHeight = height;
+
+	m_PostRenderQueue.push_back([&]()
+	{
+		framebuffer->Resize(s_ViewportWidth, s_ViewportHeight);
+		SetCameraProjection(camera, s_ViewportWidth, s_ViewportHeight, cameraZoom);
+	});
+}
+
 static void DrawViewport()
 {
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0, 0 });
 	ImGui::Begin("Viewport");
-	ImGui::Image((void*)framebuffer->GetColorBufferRendererID(), { 1280, 720 }, { 0, 1 }, { 1, 0 });
+	ImVec2 viewportSize = ImGui::GetContentRegionAvail();
+	ImGui::Image((void*)framebuffer->GetColorBufferRendererID(), viewportSize, { 0, 1 }, { 1, 0 });
+	ResizeIfNeeded(viewportSize.x, viewportSize.y);
 	ImGui::End();
+	ImGui::PopStyleVar();
 }
 
 static void OnImGuiRender()
@@ -523,25 +547,21 @@ int main()
 	//	- Test memory allocation speeds
 
 	window = new Window("Pollock", 1280, 720);
-	Camera camera(-1.6f, 1.6f, -1.0f, 1.0f);
-	float cameraZoom = 1.0f;
-	uint32_t cameraWidth = 1280, cameraHeight = 720;
-	SetCameraProjection(camera, cameraWidth, cameraHeight, cameraZoom);
 	Renderer::Init();
 	Random::Init();
 
 	window->SetResizeCallback([&](uint32_t width, uint32_t height)
 	{
-		cameraWidth = width;
-		cameraHeight = height;
-		SetCameraProjection(camera, width, height, cameraZoom);
+		// cameraWidth = width;
+		// cameraHeight = height;
+		// SetCameraProjection(camera, width, height, cameraZoom);
 	});
 
 	window->SetMouseScrollCallback([&](float x, float y)
 	{
 		cameraZoom -= y * 0.5f;
 		cameraZoom = glm::max(0.5f, cameraZoom);
-		SetCameraProjection(camera, cameraWidth, cameraHeight, cameraZoom);
+		SetCameraProjection(camera, s_ViewportWidth, s_ViewportHeight, cameraZoom);
 	});
 
 	window->SetOnImGuiRenderCallback(OnImGuiRender);
@@ -638,6 +658,11 @@ int main()
 		framebuffer->Unbind();
 
 		window->Update();
+
+		for (auto& func : m_PostRenderQueue)
+			func();
+
+		m_PostRenderQueue.clear();
 	}
 }
 
