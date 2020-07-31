@@ -129,6 +129,7 @@ static ParticleProperties ReadParticleDataText(const std::wstring& filepath)
 	YAML::Node data = YAML::Load(strStream.str());
 
 	ParticleProperties result;
+
 	if (data["position"])
 		result.Position = data["position"].as<glm::vec2>();
 	if (data["velocity"])
@@ -188,6 +189,66 @@ static void WriteParticle(YAML::Emitter& out, const ParticleInstance& particle)
 	out << YAML::EndMap; // System
 }
 
+static std::vector<ParticleInstance> ReadParticle(const std::string& filepath)
+{
+	std::ifstream stream(filepath);
+	std::stringstream strStream;
+	strStream << stream.rdbuf();
+
+	YAML::Node dataPS = YAML::Load(strStream.str());
+
+	std::vector<ParticleInstance> result;
+
+	for (std::size_t i = 0; i < dataPS.size(); i++) {
+		ParticleProperties instanceParticle;
+		ParticleSystem instanceSystem;
+		//System
+		if (dataPS[i]["Name"]) {
+			//turn string to char array
+			std::string tempS = dataPS[i]["Name"].as<std::string>();
+			for (int j = 0; j < sizeof(instanceSystem.Name) && j < tempS.length(); j++) {
+				instanceSystem.Name[j] = tempS[j];
+			}
+		}
+		
+		//Particle
+		YAML::Node data = dataPS[i]["Particle"];
+		if (data["position"])
+			instanceParticle.Position = data["position"].as<glm::vec2>();
+		if (data["velocity"])
+			instanceParticle.Velocity = data["velocity"].as<glm::vec2>();
+		if (data["velocityVariation"])
+			instanceParticle.VelocityVariation = data["velocityVariation"].as<glm::vec2>();
+		if (data["birthColor"])
+			instanceParticle.BirthColor = data["birthColor"].as<glm::vec4>();
+		if (data["deathColor"])
+			instanceParticle.DeathColor = data["deathColor"].as<glm::vec4>();
+		if (data["birthSize"])
+			instanceParticle.BirthSize = data["birthSize"].as<float>();
+		if (data["birthSizeVariation"])
+			instanceParticle.BirthSizeVariation = data["birthSizeVariation"].as<float>();
+		if (data["deathSize"])
+			instanceParticle.DeathSize = data["deathSize"].as<float>();
+		if (data["deathSizeVariation"])
+			instanceParticle.DeathSizeVariation = data["deathSizeVariation"].as<float>();
+		if (data["rotationSpeed"])
+			instanceParticle.RotationSpeed = data["rotationSpeed"].as<float>();
+		if (data["rotationVariation"])
+			instanceParticle.RotationVariation = data["rotationVariation"].as<float>();
+		if (data["rotationSpeedVariation"])
+			instanceParticle.RotationSpeedVariation = data["rotationSpeedVariation"].as<float>();
+		if (data["lifeSpan"])
+			instanceParticle.LifeSpan = data["lifeSpan"].as<float>();
+		if (data["lifeSpanVariation"])
+			instanceParticle.LifeSpanVariation = data["lifeSpanVariation"].as<float>();
+
+		//ParticleInstance
+		result.push_back({ std::make_shared<ParticleSystem>(instanceSystem), std::make_shared<ParticleProperties>(instanceParticle) });
+	}
+
+	return result;
+}
+
 void ParticleSerializer::Serialize(const std::string& filepath, const std::vector<ParticleInstance>& instances)
 {
 	YAML::Emitter out;
@@ -207,5 +268,5 @@ void ParticleSerializer::Serialize(const std::string& filepath, const std::vecto
 
 void ParticleSerializer::Deserialize(const std::string& filepath, std::vector<ParticleInstance>& instances)
 {
-
+	instances = ReadParticle(filepath);
 }

@@ -96,6 +96,15 @@ void ParticleEditor::OnImGuiDraw()
 		serializer.Serialize(filename, m_ParticleInstances);
 	}
 
+	if (ImGui::Button("Load"))
+	{
+		std::string filename = "ParticleEditorTest.particle";
+
+		ParticleSerializer serializer;
+		serializer.Deserialize(filename, m_ParticleInstances);
+		m_index = -1;
+	}
+
 
 	ImGui::End();
 }
