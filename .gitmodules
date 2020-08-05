@@ -1,3 +1,6 @@
 [submodule "Pollock/vendor/imgui"]
 	path = Pollock/vendor/imgui
 	url = https://github.com/TheCherno/imgui
+[submodule "Pollock/vendor/ImGuizmo"]
+	path = Pollock/vendor/ImGuizmo
+	url = https://github.com/CedricGuillemet/ImGuizmo

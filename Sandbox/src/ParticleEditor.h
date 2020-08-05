@@ -19,6 +19,7 @@
 
 #include "imgui.h"
 
+#include "Pollock/Camera.h"
 #include <fstream>
 
 
@@ -30,6 +31,7 @@ public:
 
 	void OnUpdate(float ts);
 	void OnImGuiDraw();
+	void DrawGizmo(const Camera& camera, ImVec2 viewportSize);
 	void OnMenuImGuiDraw();
 
 	void AddParticleSystem();

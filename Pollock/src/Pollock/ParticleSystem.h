@@ -6,6 +6,8 @@
 
 struct ParticleProperties
 {
+	uint32_t EmissionCount = 1;
+
 	glm::vec2 Position;
 	glm::vec2 Velocity, VelocityVariation = { 0.0f, 0.0f };
 	glm::vec4 BirthColor, DeathColor;
@@ -24,6 +26,7 @@ public:
 	~ParticleSystem();
 
 	void Emit(const ParticleProperties& particleProps);
+	void EmitSingle(const ParticleProperties& particleProps);
 	void OnUpdate(float ts, bool wireframe = false);
 
 	char Name[32] = "New Particle System";

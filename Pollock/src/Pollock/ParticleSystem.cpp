@@ -17,6 +17,12 @@ ParticleSystem::~ParticleSystem()
 
 void ParticleSystem::Emit(const ParticleProperties& particleProps)
 {
+	for (uint32_t i = 0; i < particleProps.EmissionCount; i++)
+		EmitSingle(particleProps);
+}
+
+void ParticleSystem::EmitSingle(const ParticleProperties& particleProps)
+{
 	Particle& particle = m_ParticlePool[m_ParticlePoolIndex];
 	particle.Position = particleProps.Position;
 

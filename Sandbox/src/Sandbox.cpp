@@ -221,12 +221,18 @@ static void ResizeIfNeeded(uint32_t width, uint32_t height)
 	});
 }
 
+static void DrawGizmo(ImVec2 viewportSize)
+{
+	s_ParticleEditor.DrawGizmo(camera, viewportSize);
+}
+
 static void DrawViewport()
 {
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0, 0 });
 	ImGui::Begin("Viewport");
 	ImVec2 viewportSize = ImGui::GetContentRegionAvail();
 	ImGui::Image((void*)framebuffer->GetColorBufferRendererID(), viewportSize, { 0, 1 }, { 1, 0 });
+	DrawGizmo(viewportSize);
 	ResizeIfNeeded(viewportSize.x, viewportSize.y);
 	ImGui::End();
 	ImGui::PopStyleVar();

@@ -1,6 +1,7 @@
 #include "ParticleEditor.h"
 
 #include "Pollock/ParticleSerializer.h"
+#include "ImGuizmo.h"
 
 ParticleEditor::ParticleEditor()
 {
@@ -49,6 +50,7 @@ void ParticleEditor::OnImGuiDraw()
 	if (m_index != -1)
 	{
 		ImGui::InputText("Particle Name", m_ParticleInstances[m_index].System->Name, IM_ARRAYSIZE(m_ParticleInstances[m_index].System->Name));
+		ImGui::DragInt("Emission Count", (int*)&m_ParticleInstances[m_index].Properties->EmissionCount, 1, 0, 1000);
 		ImGui::DragFloat2("Position", glm::value_ptr(m_ParticleInstances[m_index].Properties->Position), 0.05f);
 
 		ImGui::DragFloat2("Velocity", glm::value_ptr(m_ParticleInstances[m_index].Properties->Velocity), 0.05f);
@@ -97,6 +99,28 @@ void ParticleEditor::OnImGuiDraw()
 	}
 	*/
 	ImGui::End();
+}
+
+void ParticleEditor::DrawGizmo(const Camera& camera, ImVec2 viewportSize)
+{
+	if (m_index == -1)
+		return;
+
+	auto& particleInstance = m_ParticleInstances[m_index];
+	auto& position = particleInstance.Properties->Position;
+
+	glm::mat4 transform = glm::translate(glm::mat4(1.0f), { position.x, position.y, 0.0f });
+
+	ImGuizmo::SetOrthographic(true);
+	ImGuizmo::SetDrawlist();
+	ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, viewportSize.x, viewportSize.y);
+
+	glm::mat4 view = camera.GetViewMatrix();
+	ImGuizmo::Manipulate(glm::value_ptr(view), glm::value_ptr(camera.GetProjectionMatrix()),
+		ImGuizmo::ROTATE, ImGuizmo::WORLD, glm::value_ptr(transform));
+
+	position.x = transform[3][0];
+	position.y = transform[3][1];
 }
 
 void ParticleEditor::OnMenuImGuiDraw() {

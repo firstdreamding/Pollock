@@ -31,6 +31,9 @@ project "Pollock"
         "%{prj.name}/vendor/yaml-cpp/src/*.cpp",
         "%{prj.name}/vendor/yaml-cpp/src/*.h",
         "%{prj.name}/vendor/yaml-cpp/include/*.h",
+
+        "%{prj.name}/vendor/ImGuizmo/ImGuizmo.h",
+        "%{prj.name}/vendor/ImGuizmo/ImGuizmo.cpp"
     }
 
     includedirs
@@ -41,6 +44,7 @@ project "Pollock"
         "%{prj.name}/vendor/glm",
         "%{prj.name}/vendor/imgui",
         "%{prj.name}/vendor/yaml-cpp/include",
+        "%{prj.name}/vendor/ImGuizmo"
     }
 
     links
@@ -83,6 +87,7 @@ project "Sandbox"
 		"Pollock/vendor/glm",
 		"Pollock/vendor/imgui",
         "Pollock/vendor/yaml-cpp/include",
+        "Pollock/vendor/ImGuizmo"
     }
 
     links
