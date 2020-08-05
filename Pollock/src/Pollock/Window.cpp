@@ -10,6 +10,7 @@
 #include "Renderer.h"
 
 #include "imgui.h"
+#include "ImGuizmo.h"
 #include "examples/imgui_impl_glfw.h"
 #include "examples/imgui_impl_opengl3.h"
 
@@ -116,6 +117,7 @@ void Window::Update()
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
+	ImGuizmo::BeginFrame();
 	if (m_ImGuiOnRenderCallback)
 		m_ImGuiOnRenderCallback();
 

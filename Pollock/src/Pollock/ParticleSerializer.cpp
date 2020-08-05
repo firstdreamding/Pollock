@@ -171,6 +171,7 @@ static void WriteParticle(YAML::Emitter& out, const ParticleInstance& particle)
 	out << YAML::Key << "Name" << YAML::Value << particle.System->Name;
 	out << YAML::Key << "Particle" << YAML::Value;
 	out << YAML::BeginMap; // Particle
+	out << YAML::Key << "count" << YAML::Value << props->EmissionCount;
 	out << YAML::Key << "position" << YAML::Value << props->Position;
 	out << YAML::Key << "velocity" << YAML::Value << props->Velocity;
 	out << YAML::Key << "velocityVariation" << YAML::Value << props->VelocityVariation;
@@ -213,6 +214,8 @@ static std::vector<ParticleInstance> ReadParticle(const std::wstring& filepath)
 		
 		//Particle
 		YAML::Node data = dataPS[i]["Particle"];
+		if (data["count"])
+			instanceParticle.EmissionCount = data["count"].as<uint32_t>();
 		if (data["position"])
 			instanceParticle.Position = data["position"].as<glm::vec2>();
 		if (data["velocity"])
