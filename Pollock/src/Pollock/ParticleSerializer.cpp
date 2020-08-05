@@ -189,7 +189,7 @@ static void WriteParticle(YAML::Emitter& out, const ParticleInstance& particle)
 	out << YAML::EndMap; // System
 }
 
-static std::vector<ParticleInstance> ReadParticle(const std::string& filepath)
+static std::vector<ParticleInstance> ReadParticle(const std::wstring& filepath)
 {
 	std::ifstream stream(filepath);
 	std::stringstream strStream;
@@ -249,7 +249,7 @@ static std::vector<ParticleInstance> ReadParticle(const std::string& filepath)
 	return result;
 }
 
-void ParticleSerializer::Serialize(const std::string& filepath, const std::vector<ParticleInstance>& instances)
+void ParticleSerializer::Serialize(const std::wstring& filepath, const std::vector<ParticleInstance>& instances)
 {
 	YAML::Emitter out;
 	out << YAML::Comment("Particle Editor");
@@ -266,7 +266,7 @@ void ParticleSerializer::Serialize(const std::string& filepath, const std::vecto
 	stream.close();
 }
 
-void ParticleSerializer::Deserialize(const std::string& filepath, std::vector<ParticleInstance>& instances)
+void ParticleSerializer::Deserialize(const std::wstring& filepath, std::vector<ParticleInstance>& instances)
 {
 	instances = ReadParticle(filepath);
 }
