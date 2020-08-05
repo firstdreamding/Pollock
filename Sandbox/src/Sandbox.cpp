@@ -322,7 +322,8 @@ static void OnImGuiRender()
 	}
 
 	if (ImGui::BeginMenuBar())
-	{
+	{	
+		/*
 		if (ImGui::BeginMenu("Docking"))
 		{
 			// Disabling fullscreen would allow the window to be moved to the front of other windows,
@@ -337,10 +338,16 @@ static void OnImGuiRender()
 			ImGui::Separator();
 			ImGui::EndMenu();
 		}
+		*/
+
+		if (ImGui::BeginMenu("File")) 
+		{
+			s_ParticleEditor.OnMenuImGuiDraw();
+			ImGui::EndMenu();
+		}
 
 		ImGui::EndMenuBar();
 	}
-
 
 	s_ParticleEditor.OnImGuiDraw();
 

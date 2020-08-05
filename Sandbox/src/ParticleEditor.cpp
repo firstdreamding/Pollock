@@ -68,45 +68,50 @@ void ParticleEditor::OnImGuiDraw()
 
 		ImGui::DragFloat("Life Span", &m_ParticleInstances[m_index].Properties->LifeSpan);
 		ImGui::DragFloat("Life Span Variation", &m_ParticleInstances[m_index].Properties->LifeSpanVariation);
+
+		if (ImGui::Button("Delete")) {
+			m_ParticleInstances.erase(m_ParticleInstances.begin() + m_index);
+			m_index = -1;
+		}
 	}
 
 	//ImGui::DragInt("Emission Rate", &s_EmissionRate, 1, 0, 100);
 	//ImGui::SliderFloat("Speed", &s_Speed, 0.1f, 5.0f);
 
+	//TODO:: See if can implement popup :)
 	/*
-	if (ImGui::Button("Save"))
-	{
-		auto filename = Sandbox::SaveFile();
-		WriteParticleDataText(filename, particle);
+	
+	if (ImGui::Button("Popup")) {
+		ImGui::OpenPopup("Importing Particles");
 	}
 
-	if (ImGui::Button("Load"))
+	if (ImGui::BeginPopupModal("Importing Particles"))
 	{
-		std::wstring string = OpenFile();
-		if (!string.empty())
-			m_Particles[m_index] = ReadParticleDataText(string);
+		ImGui::PushTextWrapPos(500);
+		ImGui::Text("Would you like to merge this file with the existing particles in this workspace or replace the workspace with the particles within the contents of the file? (Choosing the latter option will delete all unsaved progress made in your workspace)", ImVec2(480, 200));
+		ImGui::Spacing();
+		if (ImGui::Button("Merge", ImVec2(240, 40))) { ImGui::CloseCurrentPopup(); }
+		ImGui::SameLine();
+		if (ImGui:: Button("Replace", ImVec2(240, 40))) { ImGui::CloseCurrentPopup(); }
+		ImGui::EndPopup();
 	}
 	*/
-
-	if (ImGui::Button("Save"))
-	{
-		std::string filename = "ParticleEditorTest.particle";
-
-		ParticleSerializer serializer;
-		serializer.Serialize(filename, m_ParticleInstances);
-	}
-
-	if (ImGui::Button("Load"))
-	{
-		std::string filename = "ParticleEditorTest.particle";
-
-		ParticleSerializer serializer;
-		serializer.Deserialize(filename, m_ParticleInstances);
-		m_index = -1;
-	}
-
-
 	ImGui::End();
+}
+
+void ParticleEditor::OnMenuImGuiDraw() {
+	if (ImGui::MenuItem("Save All")) {
+		ParticleSerializer serializer;
+		serializer.Serialize(SaveFile(), m_ParticleInstances);
+	}
+	if (ImGui::MenuItem("Save Selected")) {
+		ParticleSerializer serializer;
+		serializer.Serialize(SaveFile(), m_ParticleInstances);
+	}
+	if (ImGui::MenuItem("Open")) {
+		ParticleSerializer serializer;
+		serializer.Deserialize(OpenFile(), m_ParticleInstances);
+	}
 }
 
 void ParticleEditor::AddParticleSystem()
@@ -129,4 +134,46 @@ void ParticleEditor::AddParticleSystem()
 
 	m_ParticleInstances.push_back({ std::make_shared<ParticleSystem>(), std::make_shared<ParticleProperties>(defaultParticle) });
 	m_index = m_ParticleInstances.size() - 1;
+}
+
+std::wstring ParticleEditor::OpenFile()
+{
+	TCHAR fileString[256] = { 0 };
+
+	OPENFILENAME ofn;
+	ZeroMemory(&ofn, sizeof(OPENFILENAME));
+	ofn.lStructSize = sizeof(OPENFILENAME);
+	ofn.lpstrFile = fileString;
+	ofn.nMaxFile = sizeof(fileString);
+	ofn.lpstrFilter = L"Particle Files (*.particle)\0*.particle\0";
+	ofn.nFilterIndex = 1;
+	ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+
+	if (GetOpenFileName(&ofn) == TRUE)
+	{
+		return ofn.lpstrFile;
+	}
+
+	return {};
+}
+
+std::wstring ParticleEditor::SaveFile()
+{
+	TCHAR fileString[256] = { 0 };
+
+	OPENFILENAME ofn;
+	ZeroMemory(&ofn, sizeof(OPENFILENAME));
+	ofn.lStructSize = sizeof(OPENFILENAME);
+	ofn.lpstrFile = fileString;
+	ofn.nMaxFile = sizeof(fileString);
+	ofn.lpstrFilter = L"Particle Files (*.particle)\0*.particle\0";
+	ofn.nFilterIndex = 1;
+	ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+
+	if (GetSaveFileName(&ofn) == TRUE)
+	{
+		return ofn.lpstrFile + (std::wstring) L".particle";
+	}
+
+	return {};
 }
