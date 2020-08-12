@@ -3,6 +3,8 @@
 #include "Pollock/ParticleSerializer.h"
 #include "ImGuizmo.h"
 
+#include <glm/gtx/matrix_decompose.hpp>
+
 ParticleEditor::ParticleEditor()
 {
 	 
@@ -101,6 +103,18 @@ void ParticleEditor::OnImGuiDraw()
 	ImGui::End();
 }
 
+static glm::quat GetRotationFromMatrix(const glm::mat4& matrix)
+{
+	glm::vec3 scale;
+	glm::quat orientation;
+	glm::vec3 translation;
+	glm::vec3 skew;
+	glm::vec4 perspective;
+	glm::decompose(matrix, scale, orientation, translation, skew, perspective);
+
+	return orientation;
+}
+
 void ParticleEditor::DrawGizmo(const Camera& camera, ImVec2 viewportSize)
 {
 	if (m_index == -1)
@@ -109,7 +123,18 @@ void ParticleEditor::DrawGizmo(const Camera& camera, ImVec2 viewportSize)
 	auto& particleInstance = m_ParticleInstances[m_index];
 	auto& position = particleInstance.Properties->Position;
 
-	glm::mat4 transform = glm::translate(glm::mat4(1.0f), { position.x, position.y, 0.0f });
+	glm::vec2 dir = glm::normalize(particleInstance.Properties->Velocity);
+	if (dir.x == 0.0f)
+		dir.x = 0.00001f;
+
+	// particle properties
+	//   - angle (float)
+	//   - force (float) 0->100
+	//   - vec2(x, y)
+
+	float angle = std::atan2(dir.y, dir.x);
+	glm::mat4 transform = glm::translate(glm::mat4(1.0f), { position.x, position.y, 0.0f })
+		* glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0, 0, 1));
 
 	ImGuizmo::SetOrthographic(true);
 	ImGuizmo::SetDrawlist();
@@ -118,6 +143,14 @@ void ParticleEditor::DrawGizmo(const Camera& camera, ImVec2 viewportSize)
 	glm::mat4 view = camera.GetViewMatrix();
 	ImGuizmo::Manipulate(glm::value_ptr(view), glm::value_ptr(camera.GetProjectionMatrix()),
 		ImGuizmo::ROTATE, ImGuizmo::WORLD, glm::value_ptr(transform));
+
+	glm::quat rotation = GetRotationFromMatrix(transform);
+	glm::vec3 rotationEuler = glm::eulerAngles(rotation);
+
+	particleInstance.Properties->Velocity = {
+		glm::cos(rotationEuler.z) * 4,
+		glm::sin(rotationEuler.z) * 4
+	};
 
 	position.x = transform[3][0];
 	position.y = transform[3][1];
