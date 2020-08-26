@@ -9,8 +9,10 @@ struct ParticleProperties
 	uint32_t EmissionCount = 1;
 
 	glm::vec2 Position;
-	glm::vec2 Velocity, VelocityVariation = { 0.0f, 0.0f };
 	glm::vec4 BirthColor, DeathColor;
+
+	float EmissionAngle = 0.0f, EmissionForce = 0.0f;
+	float EmissionAngleVariation = 0.0f, EmissionForceVariation = 0.0f;
 
 	float RotationSpeed = 0.0f;
 	float RotationVariation = 0.0f, RotationSpeedVariation = 0.0f;

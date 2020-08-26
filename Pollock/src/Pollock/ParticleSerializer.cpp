@@ -132,10 +132,14 @@ static ParticleProperties ReadParticleDataText(const std::wstring& filepath)
 
 	if (data["position"])
 		result.Position = data["position"].as<glm::vec2>();
-	if (data["velocity"])
-		result.Velocity = data["velocity"].as<glm::vec2>();
-	if (data["velocityVariation"])
-		result.VelocityVariation = data["velocityVariation"].as<glm::vec2>();
+	if (data["emissionAngle"])
+		result.EmissionAngle = data["emissionAngle"].as<float>();
+	if (data["emissionForce"])
+		result.EmissionForce = data["emissionForce"].as<float>();
+	if (data["emissionAngleVariation"])
+		result.EmissionAngleVariation = data["emissionAngleVariation"].as<float>();
+	if (data["emissionForceVariation"])
+		result.EmissionForceVariation = data["emissionForceVariation"].as<float>();
 	if (data["birthColor"])
 		result.BirthColor = data["birthColor"].as<glm::vec4>();
 	if (data["deathColor"])
@@ -173,8 +177,10 @@ static void WriteParticle(YAML::Emitter& out, const ParticleInstance& particle)
 	out << YAML::BeginMap; // Particle
 	out << YAML::Key << "count" << YAML::Value << props->EmissionCount;
 	out << YAML::Key << "position" << YAML::Value << props->Position;
-	out << YAML::Key << "velocity" << YAML::Value << props->Velocity;
-	out << YAML::Key << "velocityVariation" << YAML::Value << props->VelocityVariation;
+	out << YAML::Key << "emissionAngle" << YAML::Value << props->EmissionAngle;
+	out << YAML::Key << "emissionForce" << YAML::Value << props->EmissionForce;
+	out << YAML::Key << "emissionAngleVariation" << YAML::Value << props->EmissionAngleVariation;
+	out << YAML::Key << "emissionForceVariation" << YAML::Value << props->EmissionForceVariation;
 	out << YAML::Key << "birthColor" << YAML::Value << props->BirthColor;
 	out << YAML::Key << "deathColor" << YAML::Value << props->DeathColor;
 	out << YAML::Key << "birthSize" << YAML::Value << props->BirthSize;
