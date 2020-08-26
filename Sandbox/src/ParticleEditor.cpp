@@ -55,8 +55,10 @@ void ParticleEditor::OnImGuiDraw()
 		ImGui::DragInt("Emission Count", (int*)&m_ParticleInstances[m_index].Properties->EmissionCount, 1, 0, 1000);
 		ImGui::DragFloat2("Position", glm::value_ptr(m_ParticleInstances[m_index].Properties->Position), 0.05f);
 
-		ImGui::DragFloat2("Velocity", glm::value_ptr(m_ParticleInstances[m_index].Properties->Velocity), 0.05f);
-		ImGui::DragFloat2("Velocity Variation", glm::value_ptr(m_ParticleInstances[m_index].Properties->VelocityVariation), 0.05f);
+		ImGui::DragFloat("Emission Angle", &m_ParticleInstances[m_index].Properties->EmissionAngle, 0.05f);
+		ImGui::DragFloat("Emission Force", &m_ParticleInstances[m_index].Properties->EmissionForce, 0.05f);
+		ImGui::DragFloat("Emission Angle Variation", &m_ParticleInstances[m_index].Properties->EmissionAngleVariation, 0.05f);
+		ImGui::DragFloat("Emission Force Variation", &m_ParticleInstances[m_index].Properties->EmissionForceVariation, 0.05f);
 
 		ImGui::ColorEdit4("Birth Color", glm::value_ptr(m_ParticleInstances[m_index].Properties->BirthColor));
 		ImGui::ColorEdit4("Death Color", glm::value_ptr(m_ParticleInstances[m_index].Properties->DeathColor));
@@ -132,7 +134,7 @@ void ParticleEditor::DrawGizmo(const Camera& camera, ImVec2 viewportSize)
 	//   - force (float) 0->100
 	//   - vec2(x, y)
 
-	float angle = std::atan2(dir.y, dir.x);
+	float angle = particleInstance.Properties->EmissionAngle;
 	glm::mat4 transform = glm::translate(glm::mat4(1.0f), { position.x, position.y, 0.0f })
 		* glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0, 0, 1));
 
@@ -147,11 +149,7 @@ void ParticleEditor::DrawGizmo(const Camera& camera, ImVec2 viewportSize)
 	glm::quat rotation = GetRotationFromMatrix(transform);
 	glm::vec3 rotationEuler = glm::eulerAngles(rotation);
 
-	particleInstance.Properties->Velocity = {
-		glm::cos(rotationEuler.z) * 4,
-		glm::sin(rotationEuler.z) * 4
-	};
-
+	particleInstance.Properties->EmissionAngle = rotationEuler.z;
 	position.x = transform[3][0];
 	position.y = transform[3][1];
 }

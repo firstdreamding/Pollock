@@ -26,13 +26,12 @@ void ParticleSystem::EmitSingle(const ParticleProperties& particleProps)
 	Particle& particle = m_ParticlePool[m_ParticlePoolIndex];
 	particle.Position = particleProps.Position;
 
-	glm::vec2 velocityVariation =
-	{
-		((particleProps.VelocityVariation.x * Random::Float()) - particleProps.VelocityVariation.x * 0.5f),
-		((particleProps.VelocityVariation.y * Random::Float()) - particleProps.VelocityVariation.y * 0.5f)
-	};
+	float forceVariation = particleProps.EmissionForceVariation * Random::Float() - particleProps.EmissionForceVariation * 0.5f;
+	float velocityVariation = particleProps.EmissionAngleVariation * Random::Float() - particleProps.EmissionAngleVariation * 0.5f;
 
-	particle.Velocity = particleProps.Velocity + velocityVariation;
+	//particle.Velocity = particleProps.Velocity + velocityVariation;
+	particle.Velocity = { glm::cos(particleProps.EmissionAngle + forceVariation) * (particleProps.EmissionForce + velocityVariation),
+		glm::sin(particleProps.EmissionAngle + forceVariation) * (particleProps.EmissionForce + velocityVariation)};
 	particle.BirthColor = particleProps.BirthColor;
 	particle.DeathColor = particleProps.DeathColor;
 
