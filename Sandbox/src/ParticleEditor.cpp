@@ -5,6 +5,8 @@
 
 #include <glm/gtx/matrix_decompose.hpp>
 
+#include "Pollock/Application.h"
+
 ParticleEditor::ParticleEditor()
 {
 	 
@@ -16,6 +18,15 @@ ParticleEditor::~ParticleEditor()
 
 void ParticleEditor::OnUpdate(float ts)
 {
+	// Keyboard shortcuts
+	if (Application::IsKeyPressed(PL_KEY_Q))
+		m_ActiveGizmo = -1;
+	if (Application::IsKeyPressed(PL_KEY_W))
+		m_ActiveGizmo = ImGuizmo::TRANSLATE;
+	if (Application::IsKeyPressed(PL_KEY_E))
+		m_ActiveGizmo = ImGuizmo::ROTATE;
+
+	// Particles
 	for (int i = 0; i < m_ParticleInstances.size(); i++)
 	{
 		m_ParticleInstances[i].System->Emit(*m_ParticleInstances[i].Properties);
@@ -119,7 +130,7 @@ static glm::quat GetRotationFromMatrix(const glm::mat4& matrix)
 
 void ParticleEditor::DrawGizmo(const Camera& camera, ImVec2 viewportSize)
 {
-	if (m_index == -1)
+	if (m_index == -1 || m_ActiveGizmo == -1)
 		return;
 
 	auto& particleInstance = m_ParticleInstances[m_index];
@@ -140,7 +151,7 @@ void ParticleEditor::DrawGizmo(const Camera& camera, ImVec2 viewportSize)
 
 	glm::mat4 view = camera.GetViewMatrix();
 	ImGuizmo::Manipulate(glm::value_ptr(view), glm::value_ptr(camera.GetProjectionMatrix()),
-		ImGuizmo::ROTATE, ImGuizmo::LOCAL, glm::value_ptr(transform));
+		(ImGuizmo::OPERATION)m_ActiveGizmo, ImGuizmo::LOCAL, glm::value_ptr(transform));
 
 	glm::quat rotation = GetRotationFromMatrix(transform);
 	glm::vec3 rotationEuler = glm::eulerAngles(rotation);

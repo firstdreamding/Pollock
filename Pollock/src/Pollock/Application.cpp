@@ -21,9 +21,13 @@ struct Stats
 
 static Stats s_Stats;
 
+static Application* s_ActiveApplication = nullptr;
+
 Application::Application(const std::string& name, uint32_t width, uint32_t height)
 	: m_Name(name), m_Width(width), m_Height(height)
 {
+	s_ActiveApplication = this;
+
 	m_Window = std::make_unique<Window>(name.c_str(), width, height);
 
 	m_Window->SetResizeCallback([&](uint32_t width, uint32_t height)
@@ -40,6 +44,7 @@ Application::Application(const std::string& name, uint32_t width, uint32_t heigh
 		SetCameraProjection(m_Camera, m_ViewportWidth, m_ViewportHeight, m_CameraZoom);
 	});
 
+	
 	m_Window->SetOnImGuiRenderCallback([&]() { OnImGuiRender(); });
 
 	Renderer::Init();
@@ -124,14 +129,14 @@ void Application::MoveCamera(Camera& camera, glm::vec2& position, const std::uni
 {
 	float speed = 20.0f * timestep;
 
-	if (window->IsKeyPressed(PL_KEY_W))
+	if (window->IsKeyPressed(PL_KEY_UP))
 		position.y += speed;
-	else if (window->IsKeyPressed(PL_KEY_S))
+	else if (window->IsKeyPressed(PL_KEY_DOWN))
 		position.y -= speed;
 
-	if (window->IsKeyPressed(PL_KEY_A))
+	if (window->IsKeyPressed(PL_KEY_LEFT))
 		position.x -= speed;
-	else if (window->IsKeyPressed(PL_KEY_D))
+	else if (window->IsKeyPressed(PL_KEY_RIGHT))
 		position.x += speed;
 
 	camera.SetTranslation(position);
@@ -301,6 +306,11 @@ void Application::OnImGuiRender()
 	DrawViewport();
 
 	ImGui::End();
+}
+
+bool Application::IsKeyPressed(int keycode)
+{
+	return s_ActiveApplication->m_Window->IsKeyPressed(keycode);
 }
 
 std::wstring Application::OpenFile()
