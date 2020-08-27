@@ -43,4 +43,5 @@ private:
 	std::vector<ParticleInstance> m_ParticleInstances;
 
 	int m_index = -1;
+	int m_ActiveGizmo = -1;
 };

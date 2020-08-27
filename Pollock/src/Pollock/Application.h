@@ -25,6 +25,8 @@ public:
 
 	void OnImGuiRender();
 
+	static bool IsKeyPressed(int keycode);
+
 	Camera& GetCamera() { return m_Camera; }
 
 	std::wstring OpenFile();
