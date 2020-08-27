@@ -125,10 +125,6 @@ void ParticleEditor::DrawGizmo(const Camera& camera, ImVec2 viewportSize)
 	auto& particleInstance = m_ParticleInstances[m_index];
 	auto& position = particleInstance.Properties->Position;
 
-	glm::vec2 dir = glm::normalize(particleInstance.Properties->Velocity);
-	if (dir.x == 0.0f)
-		dir.x = 0.00001f;
-
 	// particle properties
 	//   - angle (float)
 	//   - force (float) 0->100
@@ -144,7 +140,7 @@ void ParticleEditor::DrawGizmo(const Camera& camera, ImVec2 viewportSize)
 
 	glm::mat4 view = camera.GetViewMatrix();
 	ImGuizmo::Manipulate(glm::value_ptr(view), glm::value_ptr(camera.GetProjectionMatrix()),
-		ImGuizmo::ROTATE, ImGuizmo::WORLD, glm::value_ptr(transform));
+		ImGuizmo::ROTATE, ImGuizmo::LOCAL, glm::value_ptr(transform));
 
 	glm::quat rotation = GetRotationFromMatrix(transform);
 	glm::vec3 rotationEuler = glm::eulerAngles(rotation);
@@ -173,8 +169,6 @@ void ParticleEditor::AddParticleSystem()
 {
 	ParticleProperties defaultParticle;
 	defaultParticle.Position = { 0.0f, 0.0f };
-	defaultParticle.Velocity = { 0.0f, 4.0f };
-	defaultParticle.VelocityVariation = { 4.0f, 2.0f };
 	defaultParticle.BirthColor = { 1.0f, 0.0f, 0.0f, 1.0f };
 	defaultParticle.DeathColor = { 1.0f, 1.0f, 0.0f, 0.0f };
 	defaultParticle.BirthSize = 0.2f;
