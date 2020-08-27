@@ -224,10 +224,6 @@ static std::vector<ParticleInstance> ReadParticle(const std::wstring& filepath)
 			instanceParticle.EmissionCount = data["count"].as<uint32_t>();
 		if (data["position"])
 			instanceParticle.Position = data["position"].as<glm::vec2>();
-		if (data["velocity"])
-			instanceParticle.Velocity = data["velocity"].as<glm::vec2>();
-		if (data["velocityVariation"])
-			instanceParticle.VelocityVariation = data["velocityVariation"].as<glm::vec2>();
 		if (data["birthColor"])
 			instanceParticle.BirthColor = data["birthColor"].as<glm::vec4>();
 		if (data["deathColor"])
