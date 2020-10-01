@@ -22,8 +22,10 @@ struct RendererData
 	uint32_t VertexBuffer;
 
 	std::unique_ptr<Shader> QuadShader;
+	int UniformViewProjLocation = -1;
 
 	glm::vec4 VertexPositions[4];
+	glm::vec2 VertexTexCoords[4];
 
 	bool Wireframe = false;
 };
@@ -37,8 +39,10 @@ void Renderer::Init()
 
 		layout (location = 0) in vec3 a_Position;
 		layout (location = 1) in vec4 a_Color;
+		layout (location = 2) in vec2 a_TexCoord;
 
 		out vec4 v_Color;
+		out vec2 v_TexCoord;
 
 		uniform mat4 u_ViewProj;
 		uniform mat4 u_Transform;
@@ -46,6 +50,7 @@ void Renderer::Init()
 		void main()
 		{
 			v_Color = a_Color;
+			v_TexCoord = a_TexCoord;
 			gl_Position = u_ViewProj * vec4(a_Position, 1.0);
 		}
 	)";
@@ -56,16 +61,25 @@ void Renderer::Init()
 		layout (location = 0) out vec4 o_Color;
 
 		in vec4 v_Color;
+		in vec2 v_TexCoord;
 
 		uniform vec4 u_Color;
 
+		uniform sampler2D u_Texture;
+
 		void main()
 		{		
-			o_Color = v_Color;
+			// o_Color = vec4(v_TexCoord, 0.0, 1.0);//v_Color;
+			o_Color = texture(u_Texture, v_TexCoord);
 		}
 	)";
 
 	s_Data.QuadShader = std::make_unique<Shader>(vertexSrc, fragmentSrc);
+	s_Data.QuadShader->Bind();
+	s_Data.UniformViewProjLocation = glGetUniformLocation(s_Data.QuadShader->GetRendererID(), "u_ViewProj");
+
+	auto loc = glGetUniformLocation(s_Data.QuadShader->GetRendererID(), "u_Texture");
+	glUniform1i(loc, 0);
 
 	// Create Vertex Buffer
 	s_Data.VertexBufferBase = new Vertex[s_Data.MaxVertices];
@@ -83,6 +97,9 @@ void Renderer::Init()
 
 	glEnableVertexArrayAttrib(va, 1);
 	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void*)offsetof(Vertex, color));
+
+	glEnableVertexArrayAttrib(va, 2);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void*)offsetof(Vertex, texCoord));
 
 	// Index Buffer
 	uint32_t* indices = new uint32_t[s_Data.MaxIndices];
@@ -108,6 +125,11 @@ void Renderer::Init()
 	s_Data.VertexPositions[1] = {  0.5f, -0.5f, 0.0f, 1.0f };
 	s_Data.VertexPositions[2] = {  0.5f,  0.5f, 0.0f, 1.0f };
 	s_Data.VertexPositions[3] = { -0.5f,  0.5f, 0.0f, 1.0f };
+
+	s_Data.VertexTexCoords[0] = { 0.0f, 0.0f };
+	s_Data.VertexTexCoords[1] = { 1.0f, 0.0f };
+	s_Data.VertexTexCoords[2] = { 1.0f, 1.0f };
+	s_Data.VertexTexCoords[3] = { 0.0f, 1.0f };
 }
 
 void Renderer::OnWindowResize(uint32_t width, uint32_t height)
@@ -118,12 +140,7 @@ void Renderer::OnWindowResize(uint32_t width, uint32_t height)
 void Renderer::SetCamera(const Camera& camera)
 {
 	s_Data.QuadShader->Bind();
-
-	int projLocation = glGetUniformLocation(s_Data.QuadShader->GetRendererID(), "u_ViewProj");
-	if (projLocation == -1)
-		std::cout << "Could not find uniform!\n";
-
-	glUniformMatrix4fv(projLocation, 1, GL_FALSE, glm::value_ptr(camera.GetViewProj()));
+	glUniformMatrix4fv(s_Data.UniformViewProjLocation, 1, GL_FALSE, glm::value_ptr(camera.GetViewProj()));
 }
 
 void Renderer::Clear()
@@ -184,18 +201,22 @@ void Renderer::DrawQuad(const glm::vec2& position, const glm::vec2& size, const 
 {
 	s_Data.VertexBufferPtr->position = { position.x - size.x * 0.5f,  position.y - size.y * 0.5f, 0.0f };
 	s_Data.VertexBufferPtr->color = color;
+	s_Data.VertexBufferPtr->texCoord = { 0.0f, 0.0f };
 	s_Data.VertexBufferPtr++;
 
 	s_Data.VertexBufferPtr->position = { position.x + size.x * 0.5f,  position.y - size.y * 0.5f, 0.0f };
 	s_Data.VertexBufferPtr->color = color;
+	s_Data.VertexBufferPtr->texCoord = { 1.0f, 0.0f };
 	s_Data.VertexBufferPtr++;
 
 	s_Data.VertexBufferPtr->position = { position.x + size.x * 0.5f,  position.y + size.y * 0.5f, 0.0f };
 	s_Data.VertexBufferPtr->color = color;
+	s_Data.VertexBufferPtr->texCoord = { 1.0f, 1.0f };
 	s_Data.VertexBufferPtr++;
 
 	s_Data.VertexBufferPtr->position = { position.x - size.x * 0.5f,  position.y + size.y * 0.5f, 0.0f };
 	s_Data.VertexBufferPtr->color = color;
+	s_Data.VertexBufferPtr->texCoord = { 0.0f, 1.0f };
 	s_Data.VertexBufferPtr++;
 
 	s_Data.IndexCount += 6;
@@ -211,6 +232,7 @@ void Renderer::DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size,
 	{
 		s_Data.VertexBufferPtr->position = transform * s_Data.VertexPositions[i];
 		s_Data.VertexBufferPtr->color = color;
+		s_Data.VertexBufferPtr->texCoord = s_Data.VertexTexCoords[i];
 		s_Data.VertexBufferPtr++;
 	}
 

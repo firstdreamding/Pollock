@@ -19,8 +19,14 @@ static void OnUpdate(float ts)
 	particleEditor.OnUpdate(ts);
 }
 
+static void Print()
+{
+	std::cout << "Hello World!\n";
+}
+
 int main()
 {
+
 	// Goals:
 	//	- Speed
 	//	- Functionality (good API)
