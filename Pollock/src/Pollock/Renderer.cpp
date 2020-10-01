@@ -70,7 +70,7 @@ void Renderer::Init()
 		void main()
 		{		
 			// o_Color = vec4(v_TexCoord, 0.0, 1.0);//v_Color;
-			o_Color = texture(u_Texture, v_TexCoord);
+			o_Color = texture(u_Texture, v_TexCoord) * v_Color;
 		}
 	)";
 

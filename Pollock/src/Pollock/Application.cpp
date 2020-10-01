@@ -66,7 +66,7 @@ void Application::Run()
 	float timer = timerValue;
 	int counter = 0;
 
-	Texture2D texture("assets/Texture.png");
+	Texture2D texture("assets/Smoke.png");
 	texture.Bind();
 
 	while (!m_Window->IsClosed())

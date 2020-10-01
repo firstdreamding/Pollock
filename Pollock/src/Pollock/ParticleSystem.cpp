@@ -40,7 +40,7 @@ void ParticleSystem::EmitSingle(const ParticleProperties& particleProps)
 		float rotationVariation = (particleProps.RotationVariation * Random::Float()) - particleProps.RotationVariation * 0.5f;
 		float rotationSpeedVariation = (particleProps.RotationSpeedVariation * Random::Float()) - particleProps.RotationSpeedVariation * 0.5f;
 
-		particle.Rotation = glm::radians(Random::Float() * 360.0f) + glm::radians(rotationVariation);
+		particle.Rotation = glm::radians(rotationVariation);
 		particle.RotationSpeed = glm::radians(particleProps.RotationSpeed) + glm::radians(rotationVariation);
 	}
 
@@ -74,7 +74,7 @@ void ParticleSystem::OnUpdate(float ts, bool wireframe)
 			continue;
 		}
 
-		particle.Velocity.y -= ts * 10.0f;
+		//particle.Velocity.y -= ts * 10.0f;
 		particle.Position += particle.Velocity * ts;
 
 		particle.Rotation += particle.RotationSpeed * ts;
