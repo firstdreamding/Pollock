@@ -36,6 +36,9 @@ void ParticleEditor::OnUpdate(float ts)
 
 void ParticleEditor::OnImGuiDraw()
 {
+	OnMenuImGuiDraw();
+
+
 	ImGui::Begin("Controls");
 	if (ImGui::Button("Add Particle System"))
 	{
@@ -61,7 +64,7 @@ void ParticleEditor::OnImGuiDraw()
 	ImGui::Begin("Properties");
 
 	if (m_index != -1)
-	{
+	{ 
 		ImGui::InputText("Particle Name", m_ParticleInstances[m_index].System->Name, IM_ARRAYSIZE(m_ParticleInstances[m_index].System->Name));
 		ImGui::DragInt("Emission Count", (int*)&m_ParticleInstances[m_index].Properties->EmissionCount, 1, 0, 1000);
 		ImGui::DragFloat2("Position", glm::value_ptr(m_ParticleInstances[m_index].Properties->Position), 0.05f);
@@ -162,17 +165,25 @@ void ParticleEditor::DrawGizmo(const Camera& camera, ImVec2 viewportSize)
 }
 
 void ParticleEditor::OnMenuImGuiDraw() {
-	if (ImGui::MenuItem("Save All")) {
-		ParticleSerializer serializer;
-		serializer.Serialize(SaveFile(), m_ParticleInstances);
-	}
-	if (ImGui::MenuItem("Save Selected")) {
-		ParticleSerializer serializer;
-		serializer.Serialize(SaveFile(), m_ParticleInstances);
-	}
-	if (ImGui::MenuItem("Open")) {
-		ParticleSerializer serializer;
-		serializer.Deserialize(OpenFile(), m_ParticleInstances);
+	if (ImGui::BeginMenuBar())
+	{
+		if (ImGui::BeginMenu("File"))
+		{
+			if (ImGui::MenuItem("Save All")) {
+				ParticleSerializer serializer;
+				serializer.Serialize(SaveFile(), m_ParticleInstances);
+			}
+			if (ImGui::MenuItem("Save Selected")) {
+				ParticleSerializer serializer;
+				serializer.Serialize(SaveFile(), m_ParticleInstances);
+			}
+			if (ImGui::MenuItem("Open")) {
+				ParticleSerializer serializer;
+				serializer.Deserialize(OpenFile(), m_ParticleInstances);
+			}
+			ImGui::EndMenu();
+		}
+		ImGui::EndMenuBar();
 	}
 }
 

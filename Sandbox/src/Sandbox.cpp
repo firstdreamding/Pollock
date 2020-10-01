@@ -31,7 +31,7 @@ int main()
 	//	- Speed
 	//	- Functionality (good API)
 	//	- Utility
-	//	- Graphics
+	//	- Graphics 
 	//  - Ring Buffer
 
 	// Tests:.
