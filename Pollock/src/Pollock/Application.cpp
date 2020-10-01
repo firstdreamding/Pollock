@@ -294,12 +294,6 @@ void Application::OnImGuiRender()
 		}
 		*/
 
-		if (ImGui::BeginMenu("File"))
-		{
-			// s_ParticleEditor.OnMenuImGuiDraw();
-			ImGui::EndMenu();
-		}
-
 		ImGui::EndMenuBar();
 	}
 
