@@ -11,6 +11,8 @@
 
 #include <Windows.h>
 
+#include "Texture.h"
+
 static int s_EmissionRate = 5;
 
 struct Stats
@@ -64,6 +66,9 @@ void Application::Run()
 	float timer = timerValue;
 	int counter = 0;
 
+	Texture2D texture("assets/Texture.png");
+	texture.Bind();
+
 	while (!m_Window->IsClosed())
 	{
 		auto now = std::chrono::high_resolution_clock::now();
@@ -81,6 +86,7 @@ void Application::Run()
 		Renderer::SetCamera(m_Camera);
 		uint32_t quadCount = 0;
 
+		texture.Bind();
 		if (m_OnUpdateCallback)
 			m_OnUpdateCallback(seconds);
 
