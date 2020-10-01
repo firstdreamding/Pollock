@@ -30,7 +30,7 @@ void ParticleEditor::OnUpdate(float ts)
 	for (int i = 0; i < m_ParticleInstances.size(); i++)
 	{
 		m_ParticleInstances[i].System->Emit(*m_ParticleInstances[i].Properties);
-		m_ParticleInstances[i].System->OnUpdate(ts, i == m_index);
+		m_ParticleInstances[i].System->OnUpdate(ts, m_ShowWireframe && (i == m_index));
 	}
 }
 
@@ -46,6 +46,7 @@ void ParticleEditor::OnImGuiDraw()
 	}
 
 	ImGui::SameLine();
+	ImGui::Checkbox("Show selection wireframe", &m_ShowWireframe);
 	if (ImGui::Button("Deselect"))
 		m_index = -1;
 	if (ImGui::CollapsingHeader("Active Particle Systems"))

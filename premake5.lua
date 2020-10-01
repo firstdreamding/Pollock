@@ -33,7 +33,9 @@ project "Pollock"
         "%{prj.name}/vendor/yaml-cpp/include/*.h",
 
         "%{prj.name}/vendor/ImGuizmo/ImGuizmo.h",
-        "%{prj.name}/vendor/ImGuizmo/ImGuizmo.cpp"
+        "%{prj.name}/vendor/ImGuizmo/ImGuizmo.cpp",
+        "%{prj.name}/vendor/stb_image/stb_image.h",
+        "%{prj.name}/vendor/stb_image/stb_image.cpp"
     }
 
     includedirs
