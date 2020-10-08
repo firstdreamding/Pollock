@@ -253,7 +253,7 @@ static std::vector<ParticleInstance> ReadParticle(const std::wstring& filepath)
 		if (data["emissionAngleVariation"])
 			instanceParticle.EmissionAngleVariation = data["emissionAngleVariation"].as<float>();
 		if (data["emissionForceVariation"])
-			instanceParticle.EmissionAngle = data["emissionForceVariation"].as<float>();
+			instanceParticle.EmissionForceVariation = data["emissionForceVariation"].as<float>();
 
 		//ParticleInstance
 		result.push_back({ std::make_shared<ParticleSystem>(instanceSystem), std::make_shared<ParticleProperties>(instanceParticle) });

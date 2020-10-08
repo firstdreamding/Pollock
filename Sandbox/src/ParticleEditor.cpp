@@ -67,7 +67,7 @@ void ParticleEditor::OnImGuiDraw()
 	if (m_index != -1)
 	{ 
 		ImGui::InputText("Particle Name", m_ParticleInstances[m_index].System->Name, IM_ARRAYSIZE(m_ParticleInstances[m_index].System->Name));
-		ImGui::DragInt("Emission Count", (int*)&m_ParticleInstances[m_index].Properties->EmissionCount, 1, 0, 1000);
+		ImGui::DragInt("Emission Count", (int*)&m_ParticleInstances[m_index].Properties->EmissionCount, 1, 1, 1000);
 		ImGui::DragFloat2("Position", glm::value_ptr(m_ParticleInstances[m_index].Properties->Position), 0.05f);
 
 		ImGui::DragFloat("Emission Angle", &m_ParticleInstances[m_index].Properties->EmissionAngle, 0.05f);
