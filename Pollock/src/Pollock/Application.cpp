@@ -75,7 +75,6 @@ void Application::Run()
 		auto difference = std::chrono::duration_cast<std::chrono::nanoseconds>(now - lastTime);
 		lastTime = now;
 		auto seconds = difference.count() * 0.001f * 0.001f * 0.001f; // 0.033
-
 		timer -= seconds;
 
 		MoveCamera(m_Camera, m_CameraPosition, m_Window, seconds);
