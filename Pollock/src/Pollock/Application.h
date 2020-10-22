@@ -51,6 +51,7 @@ private:
 	std::function<void()> m_OnImGuiDrawCallback;
 
 	// TODO: Remove
+	glm::vec4 m_BackgroundColor = { 0.1f, 0.1f, 0.1f, 1.0f };
 	Camera m_Camera = Camera(-1.6f, 1.6f, -1.0f, 1.0f);
 	glm::vec2 m_CameraPosition = { 0.0f, 0.0f };
 	float m_CameraZoom = 1.0f;

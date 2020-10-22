@@ -143,9 +143,9 @@ void Renderer::SetCamera(const Camera& camera)
 	glUniformMatrix4fv(s_Data.UniformViewProjLocation, 1, GL_FALSE, glm::value_ptr(camera.GetViewProj()));
 }
 
-void Renderer::Clear()
+void Renderer::Clear(glm::vec4& clearColor)
 {
-	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+	glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
