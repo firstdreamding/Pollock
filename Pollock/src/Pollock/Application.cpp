@@ -81,7 +81,7 @@ void Application::Run()
 
 		// Rendering
 		m_Framebuffer->Bind();
-		Renderer::Clear();
+		Renderer::Clear(m_BackgroundColor);
 		Renderer::SetCamera(m_Camera);
 		uint32_t quadCount = 0;
 

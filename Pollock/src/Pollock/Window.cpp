@@ -147,6 +147,12 @@ bool Window::IsKeyPressed(int keycode) const
 	return glfwGetKey(m_WindowHandle, keycode) == GLFW_PRESS;
 }
 
+bool Window::IsMousePressed(int button) const
+{
+	return glfwGetMouseButton(m_WindowHandle, button) == GLFW_PRESS;
+}
+
+
 bool Window::IsClosed() const
 {
 	return glfwWindowShouldClose(m_WindowHandle);

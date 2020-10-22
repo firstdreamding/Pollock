@@ -19,7 +19,7 @@ public:
 
 	static void SetCamera(const Camera& camera);
 		
-	static void Clear();
+	static void Clear(glm::vec4& clearColor);
 	
 	static void SetWireframe(bool wireframe);
 
