@@ -12,7 +12,6 @@ ParticleSystem::ParticleSystem(uint32_t maxParticles)
 
 ParticleSystem::~ParticleSystem()
 {
-
 }
 
 void ParticleSystem::Emit(const ParticleProperties& particleProps)
@@ -82,8 +81,10 @@ void ParticleSystem::OnUpdate(float ts, bool wireframe)
 		float life = particle.LifeRemaining / particle.LifeSpan;
 		glm::vec4 color = glm::lerp(particle.DeathColor, particle.BirthColor, life);
 		float size = glm::lerp(particle.DeathSize, particle.BirthSize, life);
+		// Renderer::DrawRotatedTexturedQuad(particle.Position, { size, size }, particle.Rotation, m_Texture.get(), color);
 		Renderer::DrawRotatedQuad(particle.Position, { size, size }, particle.Rotation, color);
 	}
+
 	Renderer::End();
 	if (wireframe)
 		Renderer::SetWireframe(false);

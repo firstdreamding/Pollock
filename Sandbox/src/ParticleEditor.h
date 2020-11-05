@@ -29,15 +29,14 @@ public:
 	ParticleEditor();
 	~ParticleEditor();
 
+	void LoadFile(const std::wstring& filename);
+
 	void OnUpdate(float ts);
 	void OnImGuiDraw();
 	void DrawGizmo(const Camera& camera, ImVec2 viewportSize);
 	void OnMenuImGuiDraw();
 
 	void AddParticleSystem();
-
-	std::wstring ParticleEditor::SaveFile();
-	std::wstring ParticleEditor::OpenFile();
 
 private:
 	std::vector<ParticleInstance> m_ParticleInstances;
