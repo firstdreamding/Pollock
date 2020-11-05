@@ -9,6 +9,7 @@
 
 #include <imgui.h>
 
+#include "Base.h"
 #include "ParticleSystem.h"
 
 class Application

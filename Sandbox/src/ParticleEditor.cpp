@@ -7,6 +7,8 @@
 
 #include "Pollock/Application.h"
 
+#include "Pollock/Utils/FileDialogs.h"
+
 ParticleEditor::ParticleEditor()
 {
 	 
@@ -14,6 +16,12 @@ ParticleEditor::ParticleEditor()
 
 ParticleEditor::~ParticleEditor()
 {
+}
+
+void ParticleEditor::LoadFile(const std::wstring& filename)
+{
+	ParticleSerializer serializer;
+	serializer.Deserialize(filename, m_ParticleInstances);
 }
 
 void ParticleEditor::OnUpdate(float ts)
@@ -149,6 +157,8 @@ void ParticleEditor::DrawGizmo(const Camera& camera, ImVec2 viewportSize)
 	glm::mat4 transform = glm::translate(glm::mat4(1.0f), { position.x, position.y, 0.0f })
 		* glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0, 0, 1));
 
+	glm::mat4 oldTransform = transform;
+
 	ImGuizmo::SetOrthographic(true);
 	ImGuizmo::SetDrawlist();
 	ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, viewportSize.x, viewportSize.y);
@@ -157,12 +167,16 @@ void ParticleEditor::DrawGizmo(const Camera& camera, ImVec2 viewportSize)
 	ImGuizmo::Manipulate(glm::value_ptr(view), glm::value_ptr(camera.GetProjectionMatrix()),
 		(ImGuizmo::OPERATION)m_ActiveGizmo, ImGuizmo::LOCAL, glm::value_ptr(transform));
 
-	glm::quat rotation = GetRotationFromMatrix(transform);
-	glm::vec3 rotationEuler = glm::eulerAngles(rotation);
+	if (transform != oldTransform)
+	{
+		glm::quat rotation = GetRotationFromMatrix(transform);
+		glm::vec3 rotationEuler = glm::eulerAngles(rotation);
 
-	particleInstance.Properties->EmissionAngle = rotationEuler.z;
-	position.x = transform[3][0];
-	position.y = transform[3][1];
+		particleInstance.Properties->EmissionAngle = rotationEuler.z;
+		position.x = transform[3][0];
+		position.y = transform[3][1];
+	}
+
 }
 
 void ParticleEditor::OnMenuImGuiDraw() {
@@ -172,15 +186,16 @@ void ParticleEditor::OnMenuImGuiDraw() {
 		{
 			if (ImGui::MenuItem("Save All")) {
 				ParticleSerializer serializer;
-				serializer.Serialize(SaveFile(), m_ParticleInstances);
+				serializer.Serialize(FileDialogs::SaveFileW(L"Particle Files (*.particle)\0*.particle\0"), m_ParticleInstances);
 			}
 			if (ImGui::MenuItem("Save Selected")) {
 				ParticleSerializer serializer;
-				serializer.Serialize(SaveFile(), m_ParticleInstances);
+				serializer.Serialize(FileDialogs::SaveFileW(L"Particle Files (*.particle)\0*.particle\0"), m_ParticleInstances);
 			}
 			if (ImGui::MenuItem("Open")) {
-				ParticleSerializer serializer;
-				serializer.Deserialize(OpenFile(), m_ParticleInstances);
+				std::wstring filepath = FileDialogs::OpenFileW(L"Particle Files (*.particle)\0*.particle\0");
+				if (!filepath.empty())
+					LoadFile(filepath);
 			}
 			ImGui::EndMenu();
 		}
@@ -206,46 +221,4 @@ void ParticleEditor::AddParticleSystem()
 
 	m_ParticleInstances.push_back({ std::make_shared<ParticleSystem>(), std::make_shared<ParticleProperties>(defaultParticle) });
 	m_index = m_ParticleInstances.size() - 1;
-}
-
-std::wstring ParticleEditor::OpenFile()
-{
-	TCHAR fileString[256] = { 0 };
-
-	OPENFILENAME ofn;
-	ZeroMemory(&ofn, sizeof(OPENFILENAME));
-	ofn.lStructSize = sizeof(OPENFILENAME);
-	ofn.lpstrFile = fileString;
-	ofn.nMaxFile = sizeof(fileString);
-	ofn.lpstrFilter = L"Particle Files (*.particle)\0*.particle\0";
-	ofn.nFilterIndex = 1;
-	ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
-
-	if (GetOpenFileName(&ofn) == TRUE)
-	{
-		return ofn.lpstrFile;
-	}
-
-	return {};
-}
-
-std::wstring ParticleEditor::SaveFile()
-{
-	TCHAR fileString[256] = { 0 };
-
-	OPENFILENAME ofn;
-	ZeroMemory(&ofn, sizeof(OPENFILENAME));
-	ofn.lStructSize = sizeof(OPENFILENAME);
-	ofn.lpstrFile = fileString;
-	ofn.nMaxFile = sizeof(fileString);
-	ofn.lpstrFilter = L"Particle Files (*.particle)\0*.particle\0";
-	ofn.nFilterIndex = 1;
-	ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
-
-	if (GetSaveFileName(&ofn) == TRUE)
-	{
-		return ofn.lpstrFile + (std::wstring) L".particle";
-	}
-
-	return {};
 }

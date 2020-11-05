@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 #include <iostream>
 #include <vector>
+#include "Texture.h"
 
 struct ParticleProperties
 {
@@ -19,6 +20,10 @@ struct ParticleProperties
 
 	float BirthSize, DeathSize, BirthSizeVariation = 0.0f, DeathSizeVariation = 0.0f;
 	float LifeSpan, LifeSpanVariation = 0.0f;
+
+	// Texture - is it animated?
+	//         - what do we actually render?
+	Texture2D* Texture = nullptr;
 };
 
 class ParticleSystem
