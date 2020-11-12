@@ -17,6 +17,7 @@ private:
 	Ref<Texture2D> m_CurrentTexture;
 	bool m_IsAnimation = false;
 	int m_VerticalSpriteCount = 0, m_HorizontalSpriteCount = 0;
+	int m_Framerate = 15;
 
 	Ref<SubTexture2D> m_AnimationTexture;
 };

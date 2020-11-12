@@ -31,6 +31,9 @@ public:
 	void Bind(uint32_t slot = 0);
 	void Unbind();
 
+	void SetFilter(TextureFilter filter);
+	TextureFilter GetFilter() const { return m_Filter; }
+
 	uint32_t GetRendererID() const { return m_RendererID; }
 
 	uint32_t GetWidth() const { return m_Width; }
@@ -42,6 +45,8 @@ private:
 	std::string m_Path;
 	uint32_t m_Width, m_Height;
 	TextureProperties m_Properties;
+
+	TextureFilter m_Filter;
 };
 
 class SubTexture2D
@@ -53,8 +58,12 @@ public:
 	Ref<Texture2D> GetTexture() { return m_Texture; }
 	int GetHorizontalSpriteCount() const { return m_HorizontalSpriteCount; }
 	int GetVerticalSpriteCount() const { return m_VerticalSpriteCount; }
+
+	int GetFrameRate() const { return m_FrameRate; }
+	int SetFrameRate(int framerate) { m_FrameRate = framerate; }
 private:
 	Ref<Texture2D> m_Texture;
 	std::vector<glm::vec2> m_TextureCoords;
 	int m_HorizontalSpriteCount, m_VerticalSpriteCount;
+	int m_FrameRate = 15;
 };

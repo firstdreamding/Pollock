@@ -30,7 +30,7 @@ static GLenum PollockWrapToGLWrap(TextureWrap wrap)
 }
 
 Texture2D::Texture2D(const std::string& path, const TextureProperties& textureProperties)
-	: m_Path(path), m_Properties(textureProperties)
+	: m_Path(path), m_Properties(textureProperties), m_Filter(textureProperties.Filter)
 {
 	int width, height, bpp;
 
@@ -77,6 +77,21 @@ void Texture2D::Bind(uint32_t slot)
 void Texture2D::Unbind()
 {
 	glBindTextureUnit(0, m_RendererID);
+}
+
+void Texture2D::SetFilter(TextureFilter filter)
+{
+	m_Filter = filter;
+
+	GLenum glFilter = PollockFilterToGLFilter(filter);
+
+	glBindTexture(GL_TEXTURE_2D, m_RendererID);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glFilter);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glFilter);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	//glTextureParameteri(m_RendererID, GL_TEXTURE_MIN_FILTER, glFilter);
+	//glTextureParameteri(m_RendererID, GL_TEXTURE_MAG_FILTER, glFilter);
 }
 
 SubTexture2D::SubTexture2D(const Ref<Texture2D>& texture, int horizontalSpriteCount, int verticalSpriteCount)

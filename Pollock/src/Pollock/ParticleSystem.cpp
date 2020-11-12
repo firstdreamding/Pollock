@@ -75,7 +75,6 @@ void ParticleSystem::OnUpdate(float ts, bool wireframe)
 
 		//particle.Velocity.y -= ts * 10.0f;
 		particle.Position += particle.Velocity * ts;
-
 		particle.Rotation += particle.RotationSpeed * ts;
 
 		float life = particle.LifeRemaining / particle.LifeSpan;

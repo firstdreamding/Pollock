@@ -102,7 +102,6 @@ namespace YAML {
 	};
 }
 
-
 static void WriteParticleDataBinary(const std::wstring& filepath, const ParticleProperties& particle)
 {
 	FILE* file = _wfopen(filepath.c_str(), L"wb");
