@@ -14,40 +14,28 @@
 #include "TextureEditor.h"
 #include "Pollock/Renderer.h"
 
+#include "Pollock/AnimationPlayer.h"
+
 static ParticleEditor particleEditor;
 static Ref<TextureEditor> textureEditor;
 
 static Ref<Texture2D> s_MegaManTexture;
-static Ref<SubTexture2D> s_MegaManSpriteSheet;
 
-static int s_Frame = 0;
-static int s_AnimationFPS = 5;
-static float s_AnimationTimer = 1.0f / (float)s_AnimationFPS;
-static float s_Timer = s_AnimationTimer;
+static Ref<AnimationPlayer> s_AnimationPlayer;
 
 static void OnUpdate(float ts)
 {
 	particleEditor.OnUpdate(ts);
 
-	auto animationTexture = textureEditor->GetAnimationTexture();
-	auto texture = textureEditor->GetCurrentTexture();
-	if (animationTexture && texture)
-	{
-		s_Timer -= ts;
-		if (s_Timer <= 0.0f)
-		{
-			s_Timer = s_AnimationTimer;
-			s_Frame = (s_Frame + 1);
-		}
+	s_AnimationPlayer = textureEditor->GetAnimationPlayer();
 
-		s_Frame %= (animationTexture->GetHorizontalSpriteCount() * animationTexture->GetVerticalSpriteCount());
-	
-		int xc = s_Frame % animationTexture->GetHorizontalSpriteCount();
-		int yc = s_Frame / animationTexture->GetHorizontalSpriteCount();
+	if (s_AnimationPlayer)
+	{
+		s_AnimationPlayer->OnUpdate(ts);
 
 		Renderer::Begin();
-		Renderer::DrawTexturedQuad({ 2.0f, 0.0f }, { 1.0f, 1.0f }, texture.get(),
-			animationTexture->GetTextureCoords(xc, yc));
+		Renderer::DrawTexturedQuad({ 2.0f, 0.0f }, { 1.0f, 1.0f }, s_AnimationPlayer->GetTexture().get(),
+			s_AnimationPlayer->GetTextureCoords());
 		Renderer::End();
 	}
 }
@@ -87,9 +75,18 @@ int main()
 		textureEditor->OnImGuiRender();
 
 		ImGui::Begin("Animation");
-		if (ImGui::SliderInt("FPS", &s_AnimationFPS, 0, 60))
+		if (s_AnimationPlayer)
 		{
-			s_AnimationTimer = 1.0f / (float)s_AnimationFPS;
+			float fps = s_AnimationPlayer->GetFrameRate();
+			if (ImGui::SliderFloat("FPS", &fps, 0, 60))
+			{
+				s_AnimationPlayer->SetFrameRate(fps);
+			}
+
+			if (ImGui::Button("Assign animation to particles"))
+			{
+				particleEditor.SetAnimation(s_AnimationPlayer);
+			}
 		}
 		ImGui::End();
 	});

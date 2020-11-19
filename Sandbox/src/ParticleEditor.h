@@ -38,6 +38,7 @@ public:
 
 	void AddParticleSystem();
 
+	void SetAnimation(Ref<AnimationPlayer> animation);
 private:
 	std::vector<ParticleInstance> m_ParticleInstances;
 

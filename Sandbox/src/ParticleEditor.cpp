@@ -222,3 +222,12 @@ void ParticleEditor::AddParticleSystem()
 	m_ParticleInstances.push_back({ std::make_shared<ParticleSystem>(), std::make_shared<ParticleProperties>(defaultParticle) });
 	m_index = m_ParticleInstances.size() - 1;
 }
+
+void ParticleEditor::SetAnimation(Ref<AnimationPlayer> animation)
+{
+	if (m_ParticleInstances.size())
+	{
+		m_ParticleInstances[0].Properties->Animation = animation;
+
+	}
+}

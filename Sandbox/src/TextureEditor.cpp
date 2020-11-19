@@ -95,6 +95,7 @@ void TextureEditor::OnImGuiRender()
 			if (ImGui::Button("Create Sub-Texture"))
 			{
 				m_AnimationTexture = std::make_shared<SubTexture2D>(m_CurrentTexture, m_VerticalSpriteCount, m_HorizontalSpriteCount);
+				m_AnimationPlayer = std::make_shared<AnimationPlayer>(m_AnimationTexture);
 			}
 		}
 

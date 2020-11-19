@@ -31,5 +31,6 @@ public:
 	static void DrawTexturedQuad(const glm::vec2& position, const glm::vec2& size, Texture2D* texture, const glm::vec4& color = { 1.0f, 1.0f, 1.0f, 1.0f });
 	static void DrawTexturedQuad(const glm::vec2& position, const glm::vec2& size, Texture2D* texture, const glm::vec2* texCoords, const glm::vec4& color = { 1.0f, 1.0f, 1.0f, 1.0f });
 	static void DrawRotatedTexturedQuad(const glm::vec2& position, const glm::vec2& size, float rotationRadians, Texture2D* texture, const glm::vec4& color = { 1.0f, 1.0f, 1.0f, 1.0f });
+	static void DrawRotatedTexturedQuad(const glm::vec2& position, const glm::vec2& size, float rotationRadians, Texture2D* texture, const glm::vec2* texCoords, const glm::vec4& color = { 1.0f, 1.0f, 1.0f, 1.0f });
 	static void End();
 };

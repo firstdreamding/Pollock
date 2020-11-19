@@ -53,6 +53,9 @@ void ParticleSystem::EmitSingle(const ParticleProperties& particleProps)
 	particle.LifeRemaining = particle.LifeSpan;
 	particle.Active = true;
 
+	if (particleProps.Animation)
+		particle.Animation = std::make_shared<AnimationPlayer>(*particleProps.Animation);
+
 	m_ParticlePoolIndex = (m_ParticlePoolIndex + 1) % m_ParticlePool.size();
 }
 
@@ -80,8 +83,15 @@ void ParticleSystem::OnUpdate(float ts, bool wireframe)
 		float life = particle.LifeRemaining / particle.LifeSpan;
 		glm::vec4 color = glm::lerp(particle.DeathColor, particle.BirthColor, life);
 		float size = glm::lerp(particle.DeathSize, particle.BirthSize, life);
-		// Renderer::DrawRotatedTexturedQuad(particle.Position, { size, size }, particle.Rotation, m_Texture.get(), color);
-		Renderer::DrawRotatedQuad(particle.Position, { size, size }, particle.Rotation, color);
+		if (particle.Animation)
+		{
+			Renderer::DrawRotatedTexturedQuad(particle.Position, { size, size }, particle.Rotation, particle.Animation->GetTexture().get(),
+				particle.Animation->GetTextureCoords(), color);
+		}
+		else
+		{
+			Renderer::DrawRotatedQuad(particle.Position, { size, size }, particle.Rotation, color);
+		}
 	}
 
 	Renderer::End();
