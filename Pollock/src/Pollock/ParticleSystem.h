@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 #include "Texture.h"
+#include "AnimationPlayer.h"
 
 struct ParticleProperties
 {
@@ -24,6 +25,7 @@ struct ParticleProperties
 	// Texture - is it animated?
 	//         - what do we actually render?
 	Texture2D* Texture = nullptr;
+	Ref<AnimationPlayer> Animation;
 };
 
 class ParticleSystem
@@ -50,6 +52,8 @@ private:
 		float BirthSize, DeathSize;
 		float LifeSpan;
 		float LifeRemaining;
+
+		Ref<AnimationPlayer> Animation;
 
 		bool Active = false;
 	};

@@ -276,42 +276,7 @@ void Renderer::DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size,
 
 void Renderer::DrawTexturedQuad(const glm::vec2& position, const glm::vec2& size, Texture2D* texture, const glm::vec4& color)
 {
-	glm::mat4 transform = glm::translate(glm::mat4(1.0f), { position.x, position.y, 0.0f })
-		* glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
-
-	float textureSlot = 0.0f;
-	for (size_t i = 0; i < s_Data.Textures.size(); i++)
-	{
-		if (s_Data.Textures[i] == texture)
-		{
-			textureSlot = i + 1;
-			break;
-		}
-	}
-
-	if (textureSlot == 0.0f)
-	{
-		for (size_t i = 0; i < s_Data.Textures.size(); i++)
-		{
-			if (!s_Data.Textures[i])
-			{
-				s_Data.Textures[i] = texture;
-				textureSlot = i + 1;
-				break;
-			}
-		}
-	}
-
-	for (int i = 0; i < 4; i++)
-	{
-		s_Data.VertexBufferPtr->position = transform * s_Data.VertexPositions[i];
-		s_Data.VertexBufferPtr->color = color;
-		s_Data.VertexBufferPtr->textureID = textureSlot;
-		s_Data.VertexBufferPtr->texCoord = s_Data.VertexTexCoords[i];
-		s_Data.VertexBufferPtr++;
-	}
-
-	s_Data.IndexCount += 6;
+	DrawTexturedQuad(position, size, texture, s_Data.VertexTexCoords, color);
 }
 
 void Renderer::DrawTexturedQuad(const glm::vec2& position, const glm::vec2& size, Texture2D* texture, const glm::vec2* texCoords, const glm::vec4& color)
@@ -356,6 +321,11 @@ void Renderer::DrawTexturedQuad(const glm::vec2& position, const glm::vec2& size
 
 void Renderer::DrawRotatedTexturedQuad(const glm::vec2& position, const glm::vec2& size, float rotationRadians, Texture2D* texture, const glm::vec4& color)
 {
+	DrawRotatedTexturedQuad(position, size, rotationRadians, texture, s_Data.VertexTexCoords, color);
+}
+
+void Renderer::DrawRotatedTexturedQuad(const glm::vec2& position, const glm::vec2& size, float rotationRadians, Texture2D* texture, const glm::vec2* texCoords, const glm::vec4& color)
+{
 	glm::mat4 transform = glm::translate(glm::mat4(1.0f), { position.x, position.y, 0.0f })
 		* glm::rotate(glm::mat4(1.0f), rotationRadians, { 0.0f, 0.0f, 1.0f })
 		* glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
@@ -387,13 +357,12 @@ void Renderer::DrawRotatedTexturedQuad(const glm::vec2& position, const glm::vec
 	{
 		s_Data.VertexBufferPtr->position = transform * s_Data.VertexPositions[i];
 		s_Data.VertexBufferPtr->color = color;
-		s_Data.VertexBufferPtr->texCoord = s_Data.VertexTexCoords[i];
+		s_Data.VertexBufferPtr->texCoord = texCoords[i];
 		s_Data.VertexBufferPtr->textureID = textureSlot;
 		s_Data.VertexBufferPtr++;
 	}
 
 	s_Data.IndexCount += 6;
 }
-
 
 #endif
