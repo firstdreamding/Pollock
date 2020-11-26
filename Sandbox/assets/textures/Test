@@ -1,3 +1,7 @@
 # Texture
 AssetPath: C:\Users\gding3\Desktop\Pollock\pollock\Sandbox\assets\textures\Explosion.png
 Filter: 1
+SubTexture:
+  FrameRate: 15
+  HorizontalSpriteCount: 11
+  VerticalSpriteCount: 11

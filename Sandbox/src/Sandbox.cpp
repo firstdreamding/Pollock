@@ -15,6 +15,7 @@
 #include "Pollock/Renderer.h"
 
 #include "Pollock/AnimationPlayer.h"
+#include "ApplicationSettings.h"
 
 static ParticleEditor particleEditor;
 static Ref<TextureEditor> textureEditor;
@@ -58,6 +59,7 @@ int main()
 	//	- Test memory allocation speeds
 
 	Application application("Pollock", 1280, 720);
+	ApplicationSettings appSettings(application.m_ApplicationProp);
 
 	particleEditor.LoadFile(L"Smoke.particle");
 
@@ -89,6 +91,7 @@ int main()
 			}
 		}
 		ImGui::End();
+		appSettings.OnImGuiDraw();
 	});
 
 	application.SetOnUpdateCallback(OnUpdate);
