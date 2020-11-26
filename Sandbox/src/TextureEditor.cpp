@@ -110,5 +110,15 @@ void TextureEditor::OnImGuiRender()
 		}
 
 	}
+
+	if (ImGui::Button("Load..."))
+	{
+		std::string filepath = FileDialogs::OpenFile("Pollock Texture(*.ptex)\0 *.ptex\0");
+		if (!filepath.empty())
+		{
+			TextureSerializer serializer(m_CurrentTexture, m_AnimationTexture);
+			serializer.Deserialize(filepath);
+		}
+	}
 	ImGui::End();
 }

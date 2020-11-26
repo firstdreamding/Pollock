@@ -147,6 +147,26 @@ bool Window::IsKeyPressed(int keycode) const
 	return glfwGetKey(m_WindowHandle, keycode) == GLFW_PRESS;
 }
 
+bool Window::IsMousePressed(int button) const
+{
+	return glfwGetMouseButton(m_WindowHandle, button) == GLFW_PRESS;
+}
+
+bool Window::IsMouseReleased(int button) const
+{
+	return glfwGetMouseButton(m_WindowHandle, button) == GLFW_RELEASE;
+}
+
+glm::vec2 Window::GetMousePosition() const
+{
+	double xpos, ypos;
+	glfwGetCursorPos(m_WindowHandle, &xpos, &ypos);
+	glm::vec2 return_vec; 
+	return_vec.x = xpos;
+	return_vec.y = ypos;
+	return return_vec;
+}
+
 bool Window::IsClosed() const
 {
 	return glfwWindowShouldClose(m_WindowHandle);
