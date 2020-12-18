@@ -1,0 +1,20 @@
+# Particle Editor
+- Name: New Particle System
+  Particle:
+    count: 1
+    position: [-0.0177909434, 0.0889548957]
+    emissionAngle: 1.64999998
+    emissionForce: 1
+    emissionAngleVariation: 0
+    emissionForceVariation: 0
+    birthColor: [1, 0.772549033, 0.407843143, 0.384313732]
+    deathColor: [1, 0.291666508, 0, 0]
+    birthSize: 0.239999995
+    birthSizeVariation: 0.159999996
+    deathSize: 1.03999996
+    deathSizeVariation: 0.0399999991
+    rotationSpeed: 0
+    rotationVariation: 0
+    rotationSpeedVariation: 0
+    lifeSpan: 1
+    lifeSpanVariation: 1
