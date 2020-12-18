@@ -16,6 +16,9 @@
 
 #include "Pollock/AnimationPlayer.h"
 
+#include "Pollock/Project.h"
+#include "Pollock/Explorer.h"
+
 static ParticleEditor particleEditor;
 static Ref<TextureEditor> textureEditor;
 
@@ -59,6 +62,8 @@ int main()
 
 	Application application("Pollock", 1280, 720);
 
+	Project project("MyProject");
+
 	particleEditor.LoadFile(L"Smoke.particle");
 
 	textureEditor = std::make_shared<TextureEditor>();
@@ -69,10 +74,13 @@ int main()
 		particleEditor.DrawGizmo(camera, viewportSize);
 	});
 
+	Explorer explorer("MyProject");
+
 	application.SetImGuiDrawCallback([&]()
 	{
 		particleEditor.OnImGuiDraw();
 		textureEditor->OnImGuiRender();
+		explorer.OnImGuiRender();
 
 		ImGui::Begin("Animation");
 		if (s_AnimationPlayer)
@@ -96,3 +104,14 @@ int main()
 	application.Run();
 }
 
+#include <Windows.h>
+
+int WinMain(
+	HINSTANCE hInstance,
+	HINSTANCE hPrevInstance,
+	LPSTR     lpCmdLine,
+	int       nShowCmd
+)
+{
+	return main();
+}
