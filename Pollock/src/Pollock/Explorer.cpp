@@ -19,17 +19,7 @@ static std::vector<FileInfo> ListInDirectory(std::filesystem::path path)
 	for (const auto& entry : di)
 	{
 		const auto& entryPath = entry.path();
-		if (std::filesystem::is_directory(entryPath))
-		{
-			std::cout << entryPath.filename().string() << "/" << std::endl;
-			results.push_back({ entryPath.filename().string(), true });
-
-		}
-		else
-		{
-			std::cout << entryPath.filename().string() << std::endl;
-			results.push_back({ entryPath.filename().string(), false });
-		}
+		results.push_back({ entryPath, std::filesystem::is_directory(entryPath) });
 	}
 
 	return results;
@@ -53,11 +43,16 @@ void Explorer::OnImGuiRender()
 		{
 			m_CurrentDirectory = m_CurrentDirectory.parent_path();
 		}
+
+		ImGui::SameLine();
 	}
+
+	std::string filepath = m_CurrentDirectory.string();
+	ImGui::Text("%s", filepath.c_str());
 
 	for (const auto& file : files)
 	{
-		std::string name = file.Path.string();
+		std::string name = file.Path.filename().string();
 
 		if (file.IsDirectory)
 		{
@@ -69,9 +64,17 @@ void Explorer::OnImGuiRender()
 		else
 		{
 			ImGui::Text(name.c_str());
+
+			if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
+			{
+				std::string pathStr = file.Path.string();
+				const char* data = pathStr.c_str();
+				ImGui::SetDragDropPayload("ASSET_DRAG_DROP", data, pathStr.size());
+				ImGui::Text("%s", name.c_str());
+				ImGui::EndDragDropSource();
+			}
 		}
 	}
-
 
 	ImGui::End();
 }

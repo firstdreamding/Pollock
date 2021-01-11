@@ -25,6 +25,19 @@ void TextureEditor::OnImGuiRender()
 	else
 		ImGui::Image((ImTextureID)m_CheckerboardTexture->GetRendererID(), { 96, 96 }, { 0, 1 }, { 1, 0 });
 
+	if (ImGui::BeginDragDropTarget())
+	{
+		if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ASSET_DRAG_DROP"))
+		{
+			std::string filepath((const char*)payload->Data, payload->DataSize);
+			std::cout << "Loading drag-drop filepath: " << filepath << std::endl;
+
+			TextureProperties props = { TextureFilter::Linear, TextureWrap::Clamp };
+			m_CurrentTexture = std::make_shared<Texture2D>(filepath, props);
+		}
+		ImGui::EndDragDropTarget();
+	}
+
 	if (ImGui::IsItemHovered())
 	{
 		if (m_CurrentTexture)
