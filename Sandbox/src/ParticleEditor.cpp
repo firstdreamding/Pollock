@@ -33,8 +33,6 @@ void ParticleEditor::OnUpdate(float ts)
 		m_ActiveGizmo = ImGuizmo::TRANSLATE;
 	if (Application::IsKeyPressed(PL_KEY_E))
 		m_ActiveGizmo = ImGuizmo::ROTATE;
-
-	// Particles
 	for (int i = 0; i < m_ParticleInstances.size(); i++)
 	{
 		m_ParticleInstances[i].System->Emit(*m_ParticleInstances[i].Properties);
