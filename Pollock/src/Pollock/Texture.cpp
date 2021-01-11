@@ -89,8 +89,8 @@ void Texture2D::SetFilter(TextureFilter filter)
 	glTextureParameteri(m_RendererID, GL_TEXTURE_MAG_FILTER, glFilter);
 }
 
-SubTexture2D::SubTexture2D(const Ref<Texture2D>& texture, int horizontalSpriteCount, int verticalSpriteCount)
-	: m_Texture(texture), m_HorizontalSpriteCount(horizontalSpriteCount), m_VerticalSpriteCount(verticalSpriteCount)
+SubTexture2D::SubTexture2D(const Ref<Texture2D>& texture, int horizontalSpriteCount, int verticalSpriteCount, int framerate)
+	: m_Texture(texture), m_HorizontalSpriteCount(horizontalSpriteCount), m_VerticalSpriteCount(verticalSpriteCount), m_FrameRate(framerate)
 {
 	auto width = texture->GetWidth();
 	auto height = texture->GetHeight();

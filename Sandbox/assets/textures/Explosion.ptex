@@ -1,7 +1,7 @@
 # Texture
-AssetPath: C:\Dev\Tutoring\Geoffrey\Pollock\Sandbox\assets\textures\Explosion.png
+AssetPath: C:\Users\gding3\Desktop\pollock-test\Sandbox\assets\textures\Explosion.png
 Filter: 2
 SubTexture:
-  FrameRate: 15
+  FrameRate: 10
   HorizontalSpriteCount: 9
   VerticalSpriteCount: 9

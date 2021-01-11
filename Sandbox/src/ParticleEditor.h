@@ -41,8 +41,10 @@ public:
 	void SetAnimation(Ref<AnimationPlayer> animation);
 private:
 	std::vector<ParticleInstance> m_ParticleInstances;
+	Ref<Texture2D> m_CheckerboardTexture;
 
 	int m_index = -1;
 	int m_ActiveGizmo = -1;
 	bool m_ShowWireframe = true;
+	
 };

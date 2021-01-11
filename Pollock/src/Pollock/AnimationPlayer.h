@@ -5,7 +5,7 @@
 class AnimationPlayer
 {
 public:
-	explicit AnimationPlayer(const Ref<SubTexture2D>& animationTexture, float frameRate = 15.0f);
+	explicit AnimationPlayer(const Ref<SubTexture2D>& animationTexture);
 	AnimationPlayer(const AnimationPlayer&) = default;
 
 	void OnUpdate(float ts);
