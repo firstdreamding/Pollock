@@ -15,6 +15,7 @@
 #include "Pollock/Renderer.h"
 
 #include "Pollock/AnimationPlayer.h"
+#include "ApplicationSettings.h"
 
 #include "Pollock/Project.h"
 #include "Pollock/Explorer.h"
@@ -61,6 +62,7 @@ int main()
 	//	- Test memory allocation speeds
 
 	Application application("Pollock", 1280, 720);
+	ApplicationSettings appSettings(application.m_ApplicationProp);
 
 	Project project("MyProject");
 
@@ -97,6 +99,7 @@ int main()
 			}
 		}
 		ImGui::End();
+		appSettings.OnImGuiDraw();
 	});
 
 	application.SetOnUpdateCallback(OnUpdate);

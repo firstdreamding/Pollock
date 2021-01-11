@@ -30,6 +30,12 @@ public:
 
 	bool IsKeyPressed(int keycode) const;
 
+	bool IsMousePressed(int button) const;
+
+	bool IsMouseReleased(int button) const;
+
+	glm::vec2 GetMousePosition() const;
+
 	bool IsClosed() const;
 
 	HWND GetWin32Window();

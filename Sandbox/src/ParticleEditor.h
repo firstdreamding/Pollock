@@ -45,4 +45,5 @@ private:
 	int m_index = -1;
 	int m_ActiveGizmo = -1;
 	bool m_ShowWireframe = true;
+	float m_seconds = 0;	 
 };
