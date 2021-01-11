@@ -12,6 +12,11 @@
 #include "Base.h"
 #include "ParticleSystem.h"
 
+struct ApplicationProperties
+{
+	glm::vec4 m_BackgroundColor = { 0.1f, 0.1f, 0.1f, 1.0f };
+};
+
 class Application
 {
 public:
@@ -32,6 +37,9 @@ public:
 
 	std::wstring OpenFile();
 	std::wstring SaveFile();
+
+	ApplicationProperties m_ApplicationProp;
+
 private:
 	void ResizeIfNeeded(uint32_t width, uint32_t height);
 	void DrawViewport();
@@ -52,8 +60,12 @@ private:
 	std::function<void()> m_OnImGuiDrawCallback;
 
 	// TODO: Remove
+	bool m_FirstClick = true;
 	Camera m_Camera = Camera(-1.6f, 1.6f, -1.0f, 1.0f);
 	glm::vec2 m_CameraPosition = { 0.0f, 0.0f };
+	glm::vec2 m_LastMousePosition = { 0.0f, 0.0f };
+	glm::vec2 m_LastCameraPosition = { 0.0f, 0.0f };
+	glm::vec2 m_CameraSpeed = { 0.0f, 0.0f };
 	float m_CameraZoom = 1.0f;
 	float m_Speed = 1.0f;
 	ParticleProperties m_Particle;

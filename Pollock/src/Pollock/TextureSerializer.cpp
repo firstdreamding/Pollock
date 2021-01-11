@@ -3,8 +3,9 @@
 #include "yaml-cpp/yaml.h"
 
 #include <fstream>
+#include <iostream>
 
-TextureSerializer::TextureSerializer(Ref<Texture2D> texture, Ref<SubTexture2D> subTexture)
+TextureSerializer::TextureSerializer(Ref<Texture2D>& texture, Ref<SubTexture2D>& subTexture)
 	: m_Texture(texture), m_SubTexture(subTexture)
 {
 }

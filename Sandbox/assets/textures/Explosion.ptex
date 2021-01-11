@@ -1,7 +1,7 @@
 # Texture
 AssetPath: assets\textures\Explosion.png
-Filter: 2
+Filter: 1
 SubTexture:
-  FrameRate: 10
+  FrameRate: 15
   HorizontalSpriteCount: 9
   VerticalSpriteCount: 9
