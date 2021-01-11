@@ -78,7 +78,7 @@ void Application::Run()
 
 		// Rendering
 		m_Framebuffer->Bind();
-		Renderer::Clear();
+		Renderer::Clear(m_ApplicationProp.m_BackgroundColor);
 		Renderer::SetCamera(m_Camera);
 		uint32_t quadCount = 0;
 
@@ -140,7 +140,26 @@ void Application::MoveCamera(Camera& camera, glm::vec2& position, const std::uni
 	else if (window->IsKeyPressed(PL_KEY_RIGHT))
 		position.x += speed;
 
+	if (window->IsMousePressed(PL_MOUSE_BUTTON_RIGHT)) {
+		if (m_FirstClick) {
+			m_LastMousePosition = window->GetMousePosition();
+			m_LastCameraPosition = position;
+			m_FirstClick = false;
+		}
+		glm::vec2 mousePos = window->GetMousePosition();
+		//std::cout << m_CameraZoom << " " << mousePos.y << std::endl;
+		float aspectRatio = (float)m_ViewportWidth / (float)m_ViewportHeight;
+
+
+		std::cout << ((mousePos.x - m_LastMousePosition.x) / ((float)m_ViewportWidth / 2)) << std::endl;
+		position.x = m_LastCameraPosition.x - (((mousePos.x - m_LastMousePosition.x) / ((float)m_ViewportWidth / 2)) * aspectRatio * m_CameraZoom);
+		position.y = m_LastCameraPosition.y + (((mousePos.y - m_LastMousePosition.y) / ((float)m_ViewportHeight / 2)) * m_CameraZoom);
+	}
+	else if (!m_FirstClick && window->IsMouseReleased(PL_MOUSE_BUTTON_RIGHT)) {
+		m_FirstClick = true;
+	}
 	camera.SetTranslation(position);
+	//std::cout << window->GetMousePosition().x << " " << window->GetMousePosition().y << " Width" << m_ViewportWidth << std::endl;
 }
 
 static void DrawImGuiStatsPanel()
