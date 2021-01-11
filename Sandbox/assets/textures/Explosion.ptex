@@ -1,5 +1,5 @@
 # Texture
-AssetPath: C:\Dev\Tutoring\Geoffrey\Pollock\Sandbox\assets\textures\Explosion.png
+AssetPath: assets\textures\Explosion.png
 Filter: 2
 SubTexture:
   FrameRate: 15
