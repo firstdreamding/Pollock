@@ -14,10 +14,14 @@ ParticleSystem::~ParticleSystem()
 {
 }
 
-void ParticleSystem::Emit(const ParticleProperties& particleProps)
+void ParticleSystem::Emit(const ParticleProperties& particleProps, float ts)
 {
-	for (uint32_t i = 0; i < particleProps.EmissionCount; i++)
+	//for (uint32_t i = 0; i < particleProps.EmissionCount; i++)
+	m_LastEmit += ts;
+	if (m_LastEmit > (1.0f / particleProps.EmissionCount)) {
 		EmitSingle(particleProps);
+		m_LastEmit = 0.0f;
+	}
 }
 
 void ParticleSystem::EmitSingle(const ParticleProperties& particleProps)
@@ -29,8 +33,8 @@ void ParticleSystem::EmitSingle(const ParticleProperties& particleProps)
 	float velocityVariation = particleProps.EmissionAngleVariation * Random::Float() - particleProps.EmissionAngleVariation * 0.5f;
 
 	//particle.Velocity = particleProps.Velocity + velocityVariation;
-	particle.Velocity = { glm::cos(particleProps.EmissionAngle + forceVariation) * (particleProps.EmissionForce + velocityVariation),
-		glm::sin(particleProps.EmissionAngle + forceVariation) * (particleProps.EmissionForce + velocityVariation)};
+	particle.Velocity = { glm::cos(glm::radians(particleProps.EmissionAngle) + forceVariation) * (particleProps.EmissionForce + velocityVariation),
+		glm::sin(glm::radians(particleProps.EmissionAngle) + forceVariation) * (particleProps.EmissionForce + velocityVariation)};
 	particle.BirthColor = particleProps.BirthColor;
 	particle.DeathColor = particleProps.DeathColor;
 
@@ -87,14 +91,15 @@ void ParticleSystem::OnUpdate(float ts, bool wireframe)
 		{
 			Renderer::DrawRotatedTexturedQuad(particle.Position, { size, size }, particle.Rotation, particle.Animation->GetTexture().get(),
 				particle.Animation->GetTextureCoords(), color);
+			particle.Animation->OnUpdate(ts);
 		}
 		else
 		{
 			Renderer::DrawRotatedQuad(particle.Position, { size, size }, particle.Rotation, color);
 		}
 	}
-
 	Renderer::End();
+
 	if (wireframe)
 		Renderer::SetWireframe(false);
 }

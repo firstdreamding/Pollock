@@ -11,7 +11,6 @@
 
 ParticleEditor::ParticleEditor()
 {
-	 
 }
 
 ParticleEditor::~ParticleEditor()
@@ -37,7 +36,7 @@ void ParticleEditor::OnUpdate(float ts)
 	// Particles
 	for (int i = 0; i < m_ParticleInstances.size(); i++)
 	{
-		m_ParticleInstances[i].System->Emit(*m_ParticleInstances[i].Properties);
+		m_ParticleInstances[i].System->Emit(*m_ParticleInstances[i].Properties, ts);
 		m_ParticleInstances[i].System->OnUpdate(ts, m_ShowWireframe && (i == m_index));
 	}
 }
@@ -75,6 +74,18 @@ void ParticleEditor::OnImGuiDraw()
 	if (m_index != -1)
 	{ 
 		ImGui::InputText("Particle Name", m_ParticleInstances[m_index].System->Name, IM_ARRAYSIZE(m_ParticleInstances[m_index].System->Name));
+		if (m_ParticleInstances[m_index].Properties->Texture)
+			ImGui::Image((ImTextureID)m_ParticleInstances[m_index].Properties->Texture->GetRendererID(), { 96, 96 }, { 0, 1 }, { 1, 0 });
+		else {
+			if (!m_CheckerboardTexture) {
+				TextureProperties props = { TextureFilter::Nearest, TextureWrap::Clamp };
+				m_CheckerboardTexture = std::make_shared<Texture2D>("assets/editor/Checkerboard.tga", props);
+			}
+			ImGui::Image((ImTextureID)m_CheckerboardTexture->GetRendererID(), { 96, 96 }, { 0, 1 }, { 1, 0 });
+		}
+
+		ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.5f);
+
 		ImGui::DragInt("Emission Count", (int*)&m_ParticleInstances[m_index].Properties->EmissionCount, 1, 1, 1000);
 		ImGui::DragFloat2("Position", glm::value_ptr(m_ParticleInstances[m_index].Properties->Position), 0.05f);
 
@@ -102,6 +113,7 @@ void ParticleEditor::OnImGuiDraw()
 			m_ParticleInstances.erase(m_ParticleInstances.begin() + m_index);
 			m_index = -1;
 		}
+		ImGui::PopItemWidth();
 	}
 
 	//ImGui::DragInt("Emission Rate", &s_EmissionRate, 1, 0, 100);
@@ -153,7 +165,7 @@ void ParticleEditor::DrawGizmo(const Camera& camera, ImVec2 viewportSize)
 	//   - force (float) 0->100
 	//   - vec2(x, y)
 
-	float angle = particleInstance.Properties->EmissionAngle;
+	float angle = glm::radians(particleInstance.Properties->EmissionAngle);
 	glm::mat4 transform = glm::translate(glm::mat4(1.0f), { position.x, position.y, 0.0f })
 		* glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0, 0, 1));
 
@@ -172,7 +184,7 @@ void ParticleEditor::DrawGizmo(const Camera& camera, ImVec2 viewportSize)
 		glm::quat rotation = GetRotationFromMatrix(transform);
 		glm::vec3 rotationEuler = glm::eulerAngles(rotation);
 
-		particleInstance.Properties->EmissionAngle = rotationEuler.z;
+		particleInstance.Properties->EmissionAngle = glm::degrees(rotationEuler.z);
 		position.x = transform[3][0];
 		position.y = transform[3][1];
 	}
@@ -227,7 +239,7 @@ void ParticleEditor::SetAnimation(Ref<AnimationPlayer> animation)
 {
 	if (m_ParticleInstances.size())
 	{
+		m_ParticleInstances[0].Properties->Texture = animation->GetTexture().get();
 		m_ParticleInstances[0].Properties->Animation = animation;
-
 	}
 }

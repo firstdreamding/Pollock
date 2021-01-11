@@ -3,7 +3,7 @@
   Particle:
     count: 1
     position: [-0.0177909434, 0.0889548957]
-    emissionAngle: 1.64999998
+    emissionAngle: 90
     emissionForce: 1
     emissionAngleVariation: 0
     emissionForceVariation: 0

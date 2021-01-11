@@ -94,7 +94,7 @@ void TextureEditor::OnImGuiRender()
 			ImGui::DragInt("Horizontal Sprite Count", &m_HorizontalSpriteCount);
 			if (ImGui::Button("Create Sub-Texture"))
 			{
-				m_AnimationTexture = std::make_shared<SubTexture2D>(m_CurrentTexture, m_VerticalSpriteCount, m_HorizontalSpriteCount);
+				m_AnimationTexture = std::make_shared<SubTexture2D>(m_CurrentTexture, m_VerticalSpriteCount, m_HorizontalSpriteCount, m_Framerate);
 				m_AnimationPlayer = std::make_shared<AnimationPlayer>(m_AnimationTexture);
 			}
 		}
@@ -108,7 +108,34 @@ void TextureEditor::OnImGuiRender()
 				serializer.Serialize(filepath);
 			}
 		}
+	}
 
+	if (ImGui::Button("Load Texture..."))
+	{
+		std::string filepath = FileDialogs::OpenFile("Pollock Texture(*.ptex)\0 *.ptex\0");
+		if (!filepath.empty())
+		{
+			TextureSerializer deserializer(m_CurrentTexture, m_AnimationTexture);
+			deserializer.Deserialize(filepath);
+
+			m_AnimationPlayer.reset();
+			m_AnimationTexture = deserializer.GetSubTexture();
+			m_CurrentTexture = deserializer.GetTexture();
+
+			//Check if subtexture was loaded in. If so, create new animation player
+			if (m_AnimationTexture) {
+				m_AnimationPlayer = std::make_shared<AnimationPlayer>(m_AnimationTexture);
+				m_IsAnimation = true;
+			}
+		}
+	}
+	ImGui::SameLine();
+
+	if (m_AnimationPlayer) {
+		if (ImGui::Button("Delete sub-texture")) {
+			m_AnimationPlayer.reset();
+			m_AnimationTexture.reset();
+		}
 	}
 	ImGui::End();
 }

@@ -37,5 +37,35 @@ void TextureSerializer::Serialize(const std::string& filepath)
 
 void TextureSerializer::Deserialize(const std::string& filepath)
 {
+	std::ifstream stream(filepath);
+	std::stringstream strStream;
+	strStream << stream.rdbuf();
 
+	YAML::Node textureRoot = YAML::Load(strStream.str());
+
+	m_Texture.reset();
+	m_SubTexture.reset();
+
+	TextureProperties props = {(TextureFilter) textureRoot["Filter"].as<int>(), TextureWrap::Clamp };
+	m_Texture = std::make_shared<Texture2D>(textureRoot["AssetPath"].as<std::string>(), props);
+
+	if (textureRoot["SubTexture"]) {
+		YAML::Node subTextureRoot = textureRoot["SubTexture"];
+		//Check if valid subtexture
+		if (subTextureRoot["HorizontalSpriteCount"] && subTextureRoot["VerticalSpriteCount"] && subTextureRoot["FrameRate"]) {
+			//Create subtexture
+			int horizontalCount = subTextureRoot["HorizontalSpriteCount"].as<int>();
+			int verticalCount = subTextureRoot["VerticalSpriteCount"].as<int>();
+			int framerate = subTextureRoot["FrameRate"].as<int>();
+			m_SubTexture = std::make_shared<SubTexture2D>(m_Texture, horizontalCount, verticalCount, framerate);
+		}
+	}
+}
+
+Ref<Texture2D> TextureSerializer::GetTexture() {
+	return m_Texture;
+}
+
+Ref<SubTexture2D> TextureSerializer::GetSubTexture() {
+	return m_SubTexture;
 }

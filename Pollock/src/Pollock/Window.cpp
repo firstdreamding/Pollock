@@ -86,7 +86,7 @@ void Window::Create()
 	ImGui::StyleColorsDark();
 	//ImGui::StyleColorsClassic();
 
-	ImFont* pFont = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\segoeui.ttf", 24.0f);
+	ImFont* pFont = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\segoeui.ttf", 18.0f);
 	io.FontDefault = io.Fonts->Fonts.back();
 
 	// When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.

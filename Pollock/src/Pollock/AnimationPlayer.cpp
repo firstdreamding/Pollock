@@ -1,9 +1,10 @@
 #include "AnimationPlayer.h"
 
-AnimationPlayer::AnimationPlayer(const Ref<SubTexture2D>& animationTexture, float framerate)
-	: m_AnimationTexture(animationTexture), m_FrameRate(framerate)
+AnimationPlayer::AnimationPlayer(const Ref<SubTexture2D>& animationTexture)
+	: m_AnimationTexture(animationTexture)
 {
-	m_AnimationTimer = 1.0f / (float)framerate;
+	m_FrameRate = animationTexture->GetFrameRate();
+	m_AnimationTimer = 1.0f / (float)m_FrameRate;
 }
 
 void AnimationPlayer::OnUpdate(float ts)

@@ -34,7 +34,7 @@ public:
 	ParticleSystem(uint32_t maxParticles = 10000);
 	~ParticleSystem();
 
-	void Emit(const ParticleProperties& particleProps);
+	void Emit(const ParticleProperties& particleProps, float ts);
 	void EmitSingle(const ParticleProperties& particleProps);
 	void OnUpdate(float ts, bool wireframe = false);
 
@@ -60,6 +60,7 @@ private:
 
 	std::vector<Particle> m_ParticlePool; // 100,000
 	uint32_t m_ParticlePoolIndex = 0;
+	float m_LastEmit = 0.0f;
 };
 
 struct ParticleInstance

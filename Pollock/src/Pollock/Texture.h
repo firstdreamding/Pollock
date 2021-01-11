@@ -52,7 +52,7 @@ private:
 class SubTexture2D
 {
 public:
-	SubTexture2D(const Ref<Texture2D>& texture, int horizontalSpriteCount, int verticalSpriteCount);
+	SubTexture2D(const Ref<Texture2D>& texture, int horizontalSpriteCount, int verticalSpriteCount, int framerate = 15);
 
 	glm::vec2* GetTextureCoords(int x, int y) { return &m_TextureCoords[(x + y * m_HorizontalSpriteCount) * 4]; }
 	Ref<Texture2D> GetTexture() { return m_Texture; }
@@ -60,10 +60,10 @@ public:
 	int GetVerticalSpriteCount() const { return m_VerticalSpriteCount; }
 
 	int GetFrameRate() const { return m_FrameRate; }
-	int SetFrameRate(int framerate) { m_FrameRate = framerate; }
+	void SetFrameRate(int framerate) { m_FrameRate = framerate; }
 private:
 	Ref<Texture2D> m_Texture;
 	std::vector<glm::vec2> m_TextureCoords;
 	int m_HorizontalSpriteCount, m_VerticalSpriteCount;
-	int m_FrameRate = 15;
+	int m_FrameRate;
 };
