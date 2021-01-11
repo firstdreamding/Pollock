@@ -39,6 +39,7 @@ static std::vector<FileInfo> ListInDirectory(std::string path)
 Project::Project(const std::string& path)
 	: m_Path(path)
 {
+#if 0
 	std::filesystem::path p(path);
 	auto absolutePath  = std::filesystem::canonical(p);
 	m_AbsolutePath = absolutePath.string();
@@ -52,5 +53,5 @@ Project::Project(const std::string& path)
 		path2 /= dir->Path;
 		ListInDirectory(path2.string());
 	}
-	
+#endif	
 }
