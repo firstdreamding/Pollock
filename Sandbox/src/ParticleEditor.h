@@ -3,7 +3,7 @@
 #include <vector>
 #include "Pollock/ParticleSystem.h"
 
-
+#include "Pollock/TextureSerializer.h"
 #include "imgui.h"
 
 #include <glm/gtc/type_ptr.hpp>

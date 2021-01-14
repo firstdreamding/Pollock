@@ -6,6 +6,7 @@ class TextureSerializer
 {
 public:
 	TextureSerializer(Ref<Texture2D>& texture, Ref<SubTexture2D>& subTexture);
+	TextureSerializer();
 
 	void Serialize(const std::string& filepath);
 	void Deserialize(const std::string& filepath);

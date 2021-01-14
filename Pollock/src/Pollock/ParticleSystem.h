@@ -39,6 +39,7 @@ public:
 	void OnUpdate(float ts, bool wireframe = false);
 
 	char Name[32] = "New Particle System";
+	std::string id;
 
 private:
 	struct Particle // 73 bytes

@@ -54,16 +54,21 @@ void ParticleEditor::OnImGuiDraw()
 	ImGui::Checkbox("Show selection wireframe", &m_ShowWireframe);
 	if (ImGui::Button("Deselect"))
 		m_index = -1;
-	if (ImGui::CollapsingHeader("Active Particle Systems"))
+	if (ImGui::TreeNode("Active Particle Systems"))
 	{
 		ImGui::Indent();
-		for (int i = 0; i < m_ParticleInstances.size(); i++) {
+		for (int i = 0; i < m_ParticleInstances.size(); i++) 
+		{
 			ImGui::PushID(i);
-			if (ImGui::Button(m_ParticleInstances[i].System->Name)) {
+			ParticleInstance currentParticleSystem = m_ParticleInstances[i];
+			ImGui::Selectable(currentParticleSystem.System->Name);
+			if (ImGui::IsItemClicked())
+			{
 				m_index = i;
 			}
 			ImGui::PopID();
 		}
+		ImGui::TreePop();
 	}
 	ImGui::End();
 
@@ -80,6 +85,27 @@ void ParticleEditor::OnImGuiDraw()
 				m_CheckerboardTexture = std::make_shared<Texture2D>("assets/editor/Checkerboard.tga", props);
 			}
 			ImGui::Image((ImTextureID)m_CheckerboardTexture->GetRendererID(), { 96, 96 }, { 0, 1 }, { 1, 0 });
+		}
+
+		if (ImGui::BeginDragDropTarget())
+		{
+			if (const ImGuiPayload * payload = ImGui::AcceptDragDropPayload("ASSET_DRAG_DROP"))
+			{
+				std::string filepath((const char*)payload->Data, payload->DataSize);
+				std::cout << "Loading drag-drop filepath for particle system: " << filepath << std::endl;
+
+				TextureSerializer deserializer;
+				deserializer.Deserialize(filepath);
+
+				m_ParticleInstances[m_index].Properties->Texture = deserializer.GetTexture().get();
+				if (deserializer.GetSubTexture()) {
+					m_ParticleInstances[m_index].Properties->Animation = std::make_shared<AnimationPlayer>(deserializer.GetSubTexture());
+				}
+				else {
+					m_ParticleInstances[m_index].Properties->Animation.reset();
+				}
+			}
+			ImGui::EndDragDropTarget();
 		}
 
 		ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.5f);
