@@ -319,7 +319,7 @@ void Application::OnImGuiRender()
 
 	DrawViewport();
 
-	//ImGui::ShowDemoWindow();
+	ImGui::ShowDemoWindow();
 	ImGui::End();
 }
 

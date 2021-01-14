@@ -12,6 +12,7 @@ ParticleSystem::ParticleSystem(uint32_t maxParticles)
 
 ParticleSystem::~ParticleSystem()
 {
+
 }
 
 void ParticleSystem::Emit(const ParticleProperties& particleProps, float ts)

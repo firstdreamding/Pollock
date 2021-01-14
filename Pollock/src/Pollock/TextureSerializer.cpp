@@ -10,6 +10,11 @@ TextureSerializer::TextureSerializer(Ref<Texture2D>& texture, Ref<SubTexture2D>&
 {
 }
 
+TextureSerializer::TextureSerializer()
+{
+
+}
+
 void TextureSerializer::Serialize(const std::string& filepath)
 {
 	YAML::Emitter out;
@@ -47,8 +52,10 @@ void TextureSerializer::Deserialize(const std::string& filepath)
 	m_Texture.reset();
 	m_SubTexture.reset();
 
-	TextureProperties props = {(TextureFilter) textureRoot["Filter"].as<int>(), TextureWrap::Clamp };
-	m_Texture = std::make_shared<Texture2D>(textureRoot["AssetPath"].as<std::string>(), props);
+	if (textureRoot["Filter"] && textureRoot["AssetPath"]) {
+		TextureProperties props = { (TextureFilter)textureRoot["Filter"].as<int>(), TextureWrap::Clamp };
+		m_Texture = std::make_shared<Texture2D>(textureRoot["AssetPath"].as<std::string>(), props);
+	}
 
 	if (textureRoot["SubTexture"]) {
 		YAML::Node subTextureRoot = textureRoot["SubTexture"];
