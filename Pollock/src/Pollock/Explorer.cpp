@@ -2,6 +2,21 @@
 
 #include <iostream>
 #include <imgui.h>
+#include <thread>
+#include <chrono>
+
+#include "Texture.h"
+#include <queue>
+
+#include <mutex>
+#include <scoped_allocator>
+#include <unordered_map>
+
+static std::thread s_ImageLoadThread;
+static std::queue<std::string> s_ImageLoadQueue;
+std::unordered_map<std::string, Image2D*> g_LoadedImages;
+
+static std::mutex s_ImageLoadQueueMutex;
 
 struct FileInfo
 {
@@ -25,10 +40,35 @@ static std::vector<FileInfo> ListInDirectory(std::filesystem::path path)
 	return results;
 }
 
+static void LoadingThread()
+{
+	while (true)
+	{
+		std::queue<std::string> imageQueue;
+		{
+			std::lock_guard<std::mutex> queueLock(s_ImageLoadQueueMutex);
+			imageQueue = s_ImageLoadQueue;
+			s_ImageLoadQueue = std::queue<std::string>();
+		}
+
+		while (!imageQueue.empty())
+		{
+			auto& path = imageQueue.front();
+			g_LoadedImages[path] = new Image2D(path);
+			imageQueue.pop();
+		}
+
+		using namespace std::chrono_literals;
+		std::this_thread::sleep_for(5ms);
+	}
+}
+
 Explorer::Explorer(const std::string& rootDir)
 {
 	m_RootDir = std::filesystem::canonical(rootDir);
 	m_CurrentDirectory = m_RootDir;
+
+	s_ImageLoadThread = std::thread(LoadingThread);
 }
 
 void Explorer::OnImGuiRender()
@@ -64,6 +104,18 @@ void Explorer::OnImGuiRender()
 		else
 		{
 			ImGui::Text(name.c_str());
+
+			std::string extension = file.Path.extension().string();
+			if (extension == ".png" || extension == ".jpg")
+			{
+				std::string path = file.Path.string();
+				if (g_LoadedImages.find(path) == g_LoadedImages.end())
+				{
+					std::lock_guard<std::mutex> queueLock(s_ImageLoadQueueMutex);
+					s_ImageLoadQueue.push(path);
+					g_LoadedImages.emplace(path, nullptr);
+				}
+			}
 
 			if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
 			{
