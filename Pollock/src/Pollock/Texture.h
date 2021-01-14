@@ -22,10 +22,13 @@ struct TextureProperties
 	TextureWrap Wrap = TextureWrap::Clamp;
 };
 
+class Image2D;
+
 class Texture2D
 {
 public:
 	Texture2D(const std::string& path, const TextureProperties& textureProperties = TextureProperties());
+	Texture2D(Image2D* image, const TextureProperties& textureProperties = TextureProperties());
 	~Texture2D();
 
 	void Bind(uint32_t slot = 0);
@@ -66,4 +69,24 @@ private:
 	std::vector<glm::vec2> m_TextureCoords;
 	int m_HorizontalSpriteCount, m_VerticalSpriteCount;
 	int m_FrameRate;
+};
+
+class Image2D
+{
+public:
+	Image2D(const std::string& path);
+	~Image2D();
+
+	template<typename T>
+	T* GetData()
+	{
+		return (T*)m_Data;
+	}
+private:
+	unsigned char* m_Data = nullptr;
+	uint32_t m_Width = 0, m_Height = 0;
+
+	std::string m_Path;
+
+	friend class Texture2D;
 };

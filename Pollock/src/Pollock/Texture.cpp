@@ -5,6 +5,8 @@
 
 #include "../vendor/stb_image/stb_image.h"
 
+#include "Timer.h"
+
 static GLenum PollockFilterToGLFilter(TextureFilter filter)
 {
 	switch (filter)
@@ -35,7 +37,11 @@ Texture2D::Texture2D(const std::string& path, const TextureProperties& texturePr
 	int width, height, bpp;
 
 	stbi_set_flip_vertically_on_load(1);
-	stbi_uc* data = stbi_load(path.c_str(), &width, &height, &bpp, STBI_rgb_alpha);
+	stbi_uc* data = nullptr;
+	{
+		ScopedTimer timer("Loading image file '" + path + "'");
+		data = stbi_load(path.c_str(), &width, &height, &bpp, STBI_rgb_alpha);
+	}
 
 	if (!data)
 	{
@@ -46,22 +52,50 @@ Texture2D::Texture2D(const std::string& path, const TextureProperties& texturePr
 	m_Width = width;
 	m_Height = height;
 
-	glGenTextures(1, &m_RendererID);
-	glBindTexture(GL_TEXTURE_2D, m_RendererID);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+	{
+		ScopedTimer timer("Uploading texture '" + path + "'");
+		glGenTextures(1, &m_RendererID);
+		glBindTexture(GL_TEXTURE_2D, m_RendererID);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
-	GLenum filter = PollockFilterToGLFilter(m_Properties.Filter);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
+		GLenum filter = PollockFilterToGLFilter(m_Properties.Filter);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
 
-	GLenum wrap = PollockWrapToGLWrap(m_Properties.Wrap);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, wrap);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap);
+		GLenum wrap = PollockWrapToGLWrap(m_Properties.Wrap);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, wrap);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap);
 
-	glBindTexture(GL_TEXTURE_2D, 0);
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
 
 	stbi_image_free(data);
+}
+
+Texture2D::Texture2D(Image2D* image, const TextureProperties& textureProperties /*= TextureProperties()*/)
+	: m_Path(image->m_Path), m_Properties(textureProperties)
+{
+	m_Width = image->m_Width;
+	m_Height = image->m_Height;
+
+	{
+		ScopedTimer timer("Uploading texture '" + image->m_Path + "'");
+		glGenTextures(1, &m_RendererID);
+		glBindTexture(GL_TEXTURE_2D, m_RendererID);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_Width, m_Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image->m_Data);
+
+		GLenum filter = PollockFilterToGLFilter(m_Properties.Filter);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
+
+		GLenum wrap = PollockWrapToGLWrap(m_Properties.Wrap);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, wrap);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap);
+
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
 }
 
 Texture2D::~Texture2D()
@@ -122,4 +156,33 @@ SubTexture2D::SubTexture2D(const Ref<Texture2D>& texture, int horizontalSpriteCo
 		}
 	}
 
+}
+
+Image2D::Image2D(const std::string& path)
+	: m_Path(path)
+{
+	int width, height, bpp;
+
+	stbi_set_flip_vertically_on_load(1);
+	stbi_uc* data = nullptr;
+	{
+		ScopedTimer timer("Loading image file '" + path + "'");
+		data = stbi_load(path.c_str(), &width, &height, &bpp, STBI_rgb_alpha);
+	}
+
+	if (!data)
+	{
+		std::cout << "Could not load texture " << path << std::endl;
+		return;
+	}
+
+	m_Data = data;
+
+	m_Width = width;
+	m_Height = height;
+}
+
+Image2D::~Image2D()
+{
+	stbi_image_free(m_Data);
 }
