@@ -82,6 +82,8 @@ public:
 	{
 		return (T*)m_Data;
 	}
+
+	const std::string& GetPath() const { return m_Path; }
 private:
 	unsigned char* m_Data = nullptr;
 	uint32_t m_Width = 0, m_Height = 0;

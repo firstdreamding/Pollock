@@ -5,6 +5,11 @@
 #include "Pollock/Utils/FileDialogs.h"
 
 #include "Pollock/TextureSerializer.h"
+#include "Pollock/Renderer.h"
+
+#include <unordered_map>
+
+extern std::unordered_map<std::string, Image2D*> g_LoadedImages;
 
 TextureEditor::TextureEditor()
 {
@@ -33,7 +38,23 @@ void TextureEditor::OnImGuiRender()
 			std::cout << "Loading drag-drop filepath: " << filepath << std::endl;
 
 			TextureProperties props = { TextureFilter::Linear, TextureWrap::Clamp };
-			m_CurrentTexture = std::make_shared<Texture2D>(filepath, props);
+#if 0
+			if (g_LoadedImages.find(filepath) != g_LoadedImages.end())
+			{
+				while (!g_LoadedImages.at(filepath)); // TODO: remove. image is still being loaded
+				auto image = g_LoadedImages.at(filepath);
+				m_CurrentTexture = std::make_shared<Texture2D>(image, props);
+			}
+			else
+				m_CurrentTexture = std::make_shared<Texture2D>(filepath, props);
+#else
+
+			auto& rq = Renderer::GetResourceQueue();
+			Texture2D* texture = rq.GetTexture(filepath);
+			if (texture)
+				m_CurrentTexture = std::shared_ptr<Texture2D>(texture);
+#endif
+
 		}
 		ImGui::EndDragDropTarget();
 	}

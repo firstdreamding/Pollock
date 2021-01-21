@@ -5,6 +5,8 @@
 #include "Camera.h"
 #include "Texture.h"
 
+#include "ResourceQueue.h"
+
 struct Vertex
 {
 	glm::vec3 position;
@@ -24,6 +26,10 @@ public:
 	static void Clear(glm::vec4 color);
 	
 	static void SetWireframe(bool wireframe);
+
+	static void ProcessResources();
+
+	static ResourceQueue& GetResourceQueue();
 
 	static void Begin();
 	static void DrawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color);

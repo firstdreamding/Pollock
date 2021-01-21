@@ -42,6 +42,8 @@ static void OnUpdate(float ts)
 			s_AnimationPlayer->GetTextureCoords());
 		Renderer::End();
 	}
+
+	Renderer::ProcessResources();
 }
 
 static void Print()
