@@ -12,6 +12,8 @@
 #include <scoped_allocator>
 #include <unordered_map>
 
+#include "Renderer.h"
+
 static std::thread s_ImageLoadThread;
 static std::queue<std::string> s_ImageLoadQueue;
 std::unordered_map<std::string, Image2D*> g_LoadedImages;
@@ -54,7 +56,9 @@ static void LoadingThread()
 		while (!imageQueue.empty())
 		{
 			auto& path = imageQueue.front();
-			g_LoadedImages[path] = new Image2D(path);
+			Image2D* image = new Image2D(path);
+			Renderer::GetResourceQueue().UploadTexture(image);
+			g_LoadedImages[path] = image;
 			imageQueue.pop();
 		}
 

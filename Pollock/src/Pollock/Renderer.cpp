@@ -26,6 +26,8 @@ struct RendererData
 	std::unique_ptr<Shader> QuadShader;
 	int UniformViewProjLocation = -1;
 
+	::ResourceQueue ResourceQueue;
+
 	glm::vec4 VertexPositions[4];
 	glm::vec2 VertexTexCoords[4];
 
@@ -168,6 +170,16 @@ void Renderer::Clear(glm::vec4 color)
 void Renderer::SetWireframe(bool wireframe)
 {
 	s_Data.Wireframe = wireframe;
+}
+
+void Renderer::ProcessResources()
+{
+	s_Data.ResourceQueue.Update();
+}
+
+ResourceQueue& Renderer::GetResourceQueue()
+{
+	return s_Data.ResourceQueue;
 }
 
 void Renderer::Begin()
