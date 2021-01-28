@@ -94,31 +94,55 @@ void Explorer::OnImGuiRender()
 	std::string filepath = m_CurrentDirectory.string();
 	ImGui::Text("%s", filepath.c_str());
 
+	float thumbnailWidth = 128;
+
+	auto[panelWidth, panelHeight] = ImGui::GetContentRegionAvail();
+
+
+	float padding = 10.0f;
+	int columnCount = panelWidth / (thumbnailWidth + padding);
+	// int rowCount = ;
+
+	//ImGui::Columns(columnCount);
+
+	int currentColumn = 0;
+
 	for (const auto& file : files)
 	{
 		std::string name = file.Path.filename().string();
 
 		if (file.IsDirectory)
 		{
-			if (ImGui::Button(name.c_str()))
+			//if (ImGui::Button(name.c_str()))
+			if (ImGui::Button(name.c_str(), { thumbnailWidth, thumbnailWidth }))
 			{
 				m_CurrentDirectory /= file.Path.filename();
 			}
 		}
 		else
 		{
-			ImGui::Text(name.c_str());
-
+			
+			
 			std::string extension = file.Path.extension().string();
 			if (extension == ".png" || extension == ".jpg")
 			{
 				std::string path = file.Path.string();
+
+				LoadThumbnail(path);
+
+				auto& rq = Renderer::GetResourceQueue();
+				Texture2D* texture = rq.GetTexture(path);
+				if (texture)
+					ImGui::Image((ImTextureID)texture->GetRendererID(), { thumbnailWidth, thumbnailWidth });
+				else
+					ImGui::Button(name.c_str(), { thumbnailWidth, thumbnailWidth });
 				if (g_LoadedImages.find(path) == g_LoadedImages.end())
 				{
 					std::lock_guard<std::mutex> queueLock(s_ImageLoadQueueMutex);
 					s_ImageLoadQueue.push(path);
 					g_LoadedImages.emplace(path, nullptr);
 				}
+
 			}
 
 			if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
@@ -130,7 +154,26 @@ void Explorer::OnImGuiRender()
 				ImGui::EndDragDropSource();
 			}
 		}
+		currentColumn++;
+		if (currentColumn >= columnCount)
+			currentColumn = 0;
+		else
+			ImGui::SameLine();
 	}
 
 	ImGui::End();
+}
+
+static std::unordered_map<std::string, std::shared_ptr<Texture2D>> s_ThumbnailCache;
+
+void Explorer::LoadThumbnail(const std::string& path)
+{
+	// TODO: ThumbnailCache class
+	//if (s_ThumbnailCache.find(path) != s_ThumbnailCache.end())
+	//	return;
+
+	// std::lock_guard<std::mutex> queueLock(s_ImageLoadQueueMutex);
+	// s_ImageLoadQueue.push(path);
+	// g_LoadedImages.emplace(path, nullptr);
+
 }
