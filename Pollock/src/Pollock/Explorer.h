@@ -10,6 +10,8 @@ public:
 
 	void OnImGuiRender();
 private:
+	void LoadThumbnail(const std::string& path);
+private:
 	std::filesystem::path m_RootDir;
 	std::filesystem::path m_CurrentDirectory;
 };
