@@ -23,7 +23,7 @@ static std::vector<FileInfo> ListInDirectory(std::string path)
 		if (std::filesystem::is_directory(entryPath))
 		{
 			std::cout << entryPath.filename().string() << "/" << std::endl;
-			results.push_back({ entryPath.filename().string(), true});
+			results.push_back({ entryPath.filename().string(), true });
 
 		}
 		else
