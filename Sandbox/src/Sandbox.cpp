@@ -14,6 +14,8 @@
 #include "TextureEditor.h"
 #include "Pollock/Renderer.h"
 
+#include "Pollock/PollockMemory.h"
+
 #include "Pollock/AnimationPlayer.h"
 #include "ApplicationSettings.h"
 
@@ -85,6 +87,10 @@ int main()
 		particleEditor.OnImGuiDraw();
 		textureEditor->OnImGuiRender();
 		explorer.OnImGuiRender();
+
+		ImGui::Begin("Memory Stats");
+		ImGui::Text("Memory Usage: %d bytes", (int)Pollock::GetMemoryUsage());
+		ImGui::End();
 
 		ImGui::Begin("Animation");
 		if (s_AnimationPlayer)
