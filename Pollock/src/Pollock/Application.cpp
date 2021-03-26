@@ -59,6 +59,11 @@ Application::~Application()
 {
 }
 
+Application* Application::Get()
+{
+	return s_ActiveApplication;
+}
+
 void Application::Run()
 {
 	auto lastTime = std::chrono::high_resolution_clock::now();
@@ -66,7 +71,7 @@ void Application::Run()
 	float timer = timerValue;
 	int counter = 0;
 
-	while (!m_Window->IsClosed())
+	while (m_IsRunning = !m_Window->IsClosed())
 	{
 		auto now = std::chrono::high_resolution_clock::now();
 		auto difference = std::chrono::duration_cast<std::chrono::nanoseconds>(now - lastTime);
@@ -114,8 +119,16 @@ void Application::Run()
 
 		m_PostRenderQueue.clear();
 	}
+
+	Shutdown();
 }
 
+void Application::Shutdown()
+{
+	// Join all threads
+	for (auto& thread : m_ThreadPool)
+		thread.join();
+}
 
 void Application::SetCameraProjection(Camera& camera, uint32_t width, uint32_t height, float zoom)
 {

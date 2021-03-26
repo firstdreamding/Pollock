@@ -8,6 +8,7 @@
 #include "Camera.h"
 
 #include <imgui.h>
+#include <thread>
 
 #include "Base.h"
 #include "ParticleSystem.h"
@@ -23,14 +24,19 @@ public:
 	Application(const std::string& name, uint32_t width, uint32_t height);
 	~Application();
 
+	static Application* Get();
+	
 	void Run();
+	void Shutdown();
 
 	void SetOnUpdateCallback(const std::function<void(float)>& func) { m_OnUpdateCallback = func; }
 	void SetImGuiDrawCallback(const std::function<void()>& func) { m_OnImGuiDrawCallback = func; }
 	void SetPostViewportDrawCallback(const std::function<void(ImVec2)>& func) { m_OnPostViewportDrawCallback = func; }
 
 	void OnImGuiRender();
-
+	
+	bool IsRunning() const { return m_IsRunning; }
+	
 	static bool IsKeyPressed(int keycode);
 
 	Camera& GetCamera() { return m_Camera; }
@@ -38,8 +44,13 @@ public:
 	std::wstring OpenFile();
 	std::wstring SaveFile();
 
-	ApplicationProperties m_ApplicationProp;
+	template<typename Fn>
+	std::thread& CreateThread(Fn&& func) // r-value reference
+	{
+		return m_ThreadPool.emplace_back(std::forward<Fn>(func));
+	}
 
+	ApplicationProperties m_ApplicationProp;
 private:
 	void ResizeIfNeeded(uint32_t width, uint32_t height);
 	void DrawViewport();
@@ -58,6 +69,10 @@ private:
 	std::function<void(float)> m_OnUpdateCallback;
 	std::function<void(ImVec2)> m_OnPostViewportDrawCallback;
 	std::function<void()> m_OnImGuiDrawCallback;
+
+	std::vector<std::thread> m_ThreadPool;
+	
+	bool m_IsRunning = false;
 
 	// TODO: Remove
 	bool m_FirstClick = true;
