@@ -29,12 +29,16 @@ void* operator new(size_t size)
 
 void operator delete(void* memory)
 {
+	if (!memory)
+		return;
+
 	void* block = (size_t*)memory - 1;
 	size_t size = *(size_t*)block;
 	if (size > 1024)
 	{
 		std::cout << "Freeing " << size << " bytes\n";
 	}
+
 	free(block);
 	s_MemoryUsage -= size;
 }

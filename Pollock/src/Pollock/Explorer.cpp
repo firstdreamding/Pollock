@@ -12,9 +12,9 @@
 #include <scoped_allocator>
 #include <unordered_map>
 
+#include "Application.h"
 #include "Renderer.h"
 
-static std::thread s_ImageLoadThread;
 static std::queue<std::string> s_ImageLoadQueue;
 std::unordered_map<std::string, Image2D*> g_LoadedImages;
 
@@ -44,7 +44,7 @@ static std::vector<FileInfo> ListInDirectory(std::filesystem::path path)
 
 static void LoadingThread()
 {
-	while (true)
+	while (Application::Get()->IsRunning())
 	{
 		std::queue<std::string> imageQueue;
 		{
@@ -65,14 +65,16 @@ static void LoadingThread()
 		using namespace std::chrono_literals;
 		std::this_thread::sleep_for(5ms);
 	}
+
+	std::cout << "Loading thread shutting down...\n";
 }
 
 Explorer::Explorer(const std::string& rootDir)
 {
 	m_RootDir = std::filesystem::canonical(rootDir);
 	m_CurrentDirectory = m_RootDir;
-
-	s_ImageLoadThread = std::thread(LoadingThread);
+	
+	Application::Get()->CreateThread(LoadingThread);
 }
 
 void Explorer::OnImGuiRender()
