@@ -110,3 +110,22 @@ project "Sandbox"
     filter "configurations:Release"
         runtime "Release"
         optimize "On"
+
+project "MultiThreadedRenderer"
+    location "MultiThreadedRenderer"
+    kind "ConsoleApp"
+    language "C++"
+    staticruntime "off"
+
+    targetdir ("bin/" .. outputdir .. "/%{prj.name}")
+    objdir  ("bin-int/" .. outputdir .. "/%{prj.name}")
+
+    files
+    {
+        "%{prj.name}/src/**.h",
+        "%{prj.name}/src/**.cpp",
+    }
+
+    filter "system:windows"
+        cppdialect "C++17"
+        systemversion "latest"       
