@@ -8,6 +8,8 @@
 
 #include "../../Pollock/src/Pollock/Timer.h"
 
+#include "Instrumentor.h"
+
 using namespace std::chrono_literals;
 
 static HANDLE s_RenderSignal;
@@ -47,8 +49,11 @@ static void AppThread()
 	s_AppThreadFrame = 0;
 	while (true)
 	{
+		ScopedInstrumentationTimer timer("AppThread-Loop");
+
 		if (s_AppThreadFrame - s_RenderThreadFrame > 1)
 		{
+			ScopedInstrumentationTimer waitTimer("AppThread-WaitForSingleObject");
 			WaitForSingleObject(s_UpdateSignal, INFINITE);
 		}
 		ResetEvent(s_UpdateSignal);
@@ -56,6 +61,7 @@ static void AppThread()
 		// PrintFrame("[AppThread] Started frame ", s_AppThreadFrame);
 		{
 			// Work here
+			ScopedInstrumentationTimer instrumentor("AppThread-Work");
 			Timer timer;
 			uint32_t frame = s_AppThreadFrame;
 			Renderer_Submit([frame]()
@@ -65,12 +71,17 @@ static void AppThread()
 				if (frame % 2 == 0)
 					std::cout << "I'm on an even frame!\n";
 			});
-
+			std::this_thread::sleep_for(1ms);
 			//std::this_thread::sleep_for(1ms);
 			Log("AppThread took ", timer.ElapsedMillis());
 		}
 		//PrintFrame("[AppThread] Finished frame ", s_AppThreadFrame);
 		s_AppThreadFrame++;
+
+		if (s_AppThreadFrame == 10)
+		{
+			Instrumentor::Get().EndSession();
+		}
 		SwapQueues();
 		SetEvent(s_RenderSignal);
 	}
@@ -83,11 +94,13 @@ static uint32_t GetRenderQueueIndex()
 
 static void ExecuteRenderCommandQueue()
 {
+	ScopedInstrumentationTimer instrumentor("ExecuteRenderCommandQueue");
 	Timer timer;
 	auto& queue = s_RenderCommandQueue[GetRenderQueueIndex()];
 	for (auto& func : queue)
 		func();
 
+	std::this_thread::sleep_for(2ms);
 	queue.clear();
 	Log("ExecuteRenderCommandQueue took ", timer.ElapsedMillis());
 }
@@ -97,7 +110,11 @@ static void RenderThread()
 	s_RenderThreadFrame = 0;
 	while (true)
 	{
-		WaitForSingleObject(s_RenderSignal, INFINITE);
+		ScopedInstrumentationTimer timer("RenderThread-Loop");
+		{
+			ScopedInstrumentationTimer waitTimer("RenderThread-WaitForSingleObject");
+			WaitForSingleObject(s_RenderSignal, INFINITE);
+		}
 		//PrintFrame("                                        [RenderThread] Started frame ", s_RenderThreadFrame);
 		{
 			// Work here
@@ -112,6 +129,8 @@ static void RenderThread()
 
 int main()
 {
+	Instrumentor::Get().BeginSession("MultiThreadedExample");
+
 	s_RenderSignal = CreateEvent(NULL, FALSE, FALSE, "RenderSignal");
 	s_UpdateSignal = CreateEvent(NULL, TRUE, FALSE, "UpdateSignal");
 
@@ -119,4 +138,6 @@ int main()
 	AppThread();
 
 	renderThread.join();
+
+
 }
