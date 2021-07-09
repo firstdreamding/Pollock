@@ -3,17 +3,27 @@
 #include <iostream>
 #include <vector>
 
+#include "Renderer.h"
+
 Shader::Shader(const std::string& vertexSrc, const std::string& fragmentSrc)
 {
-	m_RendererID = Compile(vertexSrc, fragmentSrc);
+	Ref<Shader> instance = this;
+	Renderer::Submit([instance, vertexSrc, fragmentSrc]() mutable
+	{
+		instance->m_RendererID = instance->RT_Compile(vertexSrc, fragmentSrc);
+	});
 }
 
-void Shader::Bind()
+void Shader::Bind() const
 {
-	glUseProgram(m_RendererID);
+	Ref<const Shader> instance = this;
+	Renderer::Submit([instance]()
+	{
+		glUseProgram(instance->m_RendererID);
+	});
 }
 
-GLuint Shader::Compile(const std::string& vertexSrc, const std::string& fragmentSrc)
+GLuint Shader::RT_Compile(const std::string& vertexSrc, const std::string& fragmentSrc)
 {
 	// Create an empty vertex shader handle
 	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);

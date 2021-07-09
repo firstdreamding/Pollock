@@ -1,5 +1,7 @@
 #include "Framebuffer.h"
 
+#include "Renderer.h"
+
 #include "glad/glad.h"
 
 #include <iostream>
@@ -12,30 +14,56 @@ Framebuffer::Framebuffer(uint32_t width, uint32_t height)
 
 Framebuffer::~Framebuffer()
 {
-	glDeleteFramebuffers(1, &m_RendererID);
-	glDeleteTextures(1, &m_ColorBufferRendererID);
-	glDeleteTextures(1, &m_DepthBufferRendererID);
+	uint32_t rendererID = m_RendererID;
+	uint32_t colorBufferRendererID = m_ColorBufferRendererID;
+	uint32_t depthBufferRendererID = m_DepthBufferRendererID;
+	Renderer::Submit([rendererID, colorBufferRendererID, depthBufferRendererID]()
+	{
+		glDeleteFramebuffers(1, &rendererID);
+		glDeleteTextures(1, &colorBufferRendererID);
+		glDeleteTextures(1, &depthBufferRendererID);
+	});
 }
 
 void Framebuffer::Bind()
 {
-	glBindFramebuffer(GL_FRAMEBUFFER, m_RendererID);
-	glViewport(0, 0, m_Width, m_Height);
+	Ref<Framebuffer> instance = this;
+	Renderer::Submit([instance]() mutable
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, instance->m_RendererID);
+		glViewport(0, 0, instance->m_Width, instance->m_Height);
+	});
 }
 
 void Framebuffer::Unbind()
 {
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	Ref<Framebuffer> instance = this;
+	Renderer::Submit([instance]() mutable
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	});
 }
 
 void Framebuffer::Resize(uint32_t width, uint32_t height)
 {
+	if (m_Width == width && m_Height == height)
+		return;
+
 	m_Width = width;
 	m_Height = height;
 	Invalidate();
 }
 
 void Framebuffer::Invalidate()
+{
+	Ref<Framebuffer> instance = this;
+	Renderer::Submit([instance]() mutable
+	{
+		instance->RT_Invalidate();
+	});
+}
+
+void Framebuffer::RT_Invalidate()
 {
 	if (m_RendererID)
 	{

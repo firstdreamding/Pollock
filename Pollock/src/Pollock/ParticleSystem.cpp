@@ -90,7 +90,7 @@ void ParticleSystem::OnUpdate(float ts, bool wireframe)
 		float size = glm::lerp(particle.DeathSize, particle.BirthSize, life);
 		if (particle.Animation)
 		{
-			Renderer::DrawRotatedTexturedQuad(particle.Position, { size, size }, particle.Rotation, particle.Animation->GetTexture().get(),
+			Renderer::DrawRotatedTexturedQuad(particle.Position, { size, size }, particle.Rotation, particle.Animation->GetTexture().Raw(),
 				particle.Animation->GetTextureCoords(), color);
 			particle.Animation->OnUpdate(ts);
 		}

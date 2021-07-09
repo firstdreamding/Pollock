@@ -14,6 +14,8 @@
 #include "examples/imgui_impl_glfw.h"
 #include "examples/imgui_impl_opengl3.h"
 
+#include "Timer.h"
+
 Window::Window(const std::string& name, uint32_t width, uint32_t height)
 	: m_Name(name), m_Width(width), m_Height(height)
 {
@@ -42,22 +44,22 @@ void Window::Create()
 	glfwSetWindowUserPointer(m_WindowHandle, this);
 
 	glfwSetWindowSizeCallback(m_WindowHandle, [](GLFWwindow* window, int width, int height)
-	{
-		Renderer::OnWindowResize(width, height);
+		{
+			Renderer::OnWindowResize(width, height);
 
-		Window* win = (Window*)glfwGetWindowUserPointer(window); 
+			Window* win = (Window*)glfwGetWindowUserPointer(window);
 
-		if (win->m_ResizeCallback)
-			win->m_ResizeCallback(width, height);
-	});
+			if (win->m_ResizeCallback)
+				win->m_ResizeCallback(width, height);
+		});
 
 	glfwSetScrollCallback(m_WindowHandle, [](GLFWwindow* window, double x, double y)
-	{
-		Window* win = (Window*)glfwGetWindowUserPointer(window);
+		{
+			Window* win = (Window*)glfwGetWindowUserPointer(window);
 
-		if (win->m_MouseScrollCallback)
-			win->m_MouseScrollCallback(x, y);
-	});
+			if (win->m_MouseScrollCallback)
+				win->m_MouseScrollCallback(x, y);
+		});
 
 	/* Make the window's context current */
 	glfwMakeContextCurrent(m_WindowHandle);
@@ -67,9 +69,6 @@ void Window::Create()
 	{
 		std::cout << "Failed to load glad!\n";
 	}
-
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	// Setup Dear ImGui context
 	IMGUI_CHECKVERSION();
@@ -99,7 +98,11 @@ void Window::Create()
 
 	// Setup Platform/Renderer bindings
 	ImGui_ImplGlfw_InitForOpenGL(m_WindowHandle, true);
-	ImGui_ImplOpenGL3_Init("#version 450 core");
+	Renderer::Submit([]()
+	{
+		ImGui_ImplOpenGL3_Init("#version 450 core");
+		ImGui_ImplOpenGL3_NewFrame();
+	});
 }
 
 void Window::Create(const std::string& name, uint32_t width, uint32_t height)
@@ -114,20 +117,65 @@ bool show_demo_window = true;
 bool show_another_window = false;
 ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
+static ImDrawData* s_RTImGuiDrawData = nullptr;
+static ImDrawList** s_RTImGuiDrawLists = new ImDrawList*[16];
+
+static void CopyDrawData(ImDrawData* drawData)
+{
+	ScopedTimer timer("CopyDrawData");
+
+	if (!s_RTImGuiDrawData)
+	{
+		s_RTImGuiDrawData = new ImDrawData();
+		for (int i = 0; i < 16; i++)
+			s_RTImGuiDrawLists[i] = nullptr;
+	}
+
+	memcpy(s_RTImGuiDrawData, drawData, sizeof(ImDrawData));
+	s_RTImGuiDrawData->CmdLists = s_RTImGuiDrawLists;
+
+	for (int i = 0; i < drawData->CmdListsCount; i++)
+	{
+		ImDrawList* drawList =  drawData->CmdLists[i];
+
+		if (!s_RTImGuiDrawLists[i])
+			s_RTImGuiDrawLists[i] = new ImDrawList(ImGui::GetDrawListSharedData());
+
+		s_RTImGuiDrawLists[i]->CmdBuffer = ImVector<ImDrawCmd>(drawList->CmdBuffer);
+		s_RTImGuiDrawLists[i]->IdxBuffer = ImVector<ImDrawIdx>(drawList->IdxBuffer);
+		s_RTImGuiDrawLists[i]->VtxBuffer = ImVector<ImDrawVert>(drawList->VtxBuffer);
+		s_RTImGuiDrawLists[i]->Flags = drawList->Flags;
+
+		s_RTImGuiDrawLists[i]->_Data = drawList->_Data;
+		s_RTImGuiDrawLists[i]->_OwnerName = drawList->_OwnerName;
+		s_RTImGuiDrawLists[i]->_VtxCurrentOffset = drawList->_VtxCurrentOffset;
+		s_RTImGuiDrawLists[i]->_VtxCurrentIdx = drawList->_VtxCurrentIdx;
+		s_RTImGuiDrawLists[i]->_VtxWritePtr = drawList->_VtxWritePtr;
+		s_RTImGuiDrawLists[i]->_IdxWritePtr = drawList->_IdxWritePtr;
+		s_RTImGuiDrawLists[i]->_ClipRectStack = ImVector<ImVec4>(drawList->_ClipRectStack);
+		s_RTImGuiDrawLists[i]->_TextureIdStack = ImVector<ImTextureID>(drawList->_TextureIdStack);
+		s_RTImGuiDrawLists[i]->_Path = ImVector<ImVec2>(drawList->_Path);
+		s_RTImGuiDrawLists[i]->_Splitter = drawList->_Splitter;
+	}
+}
+
 void Window::Update()
 {
-	// Start the Dear ImGui frame
-	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
 	ImGuizmo::BeginFrame();
 	if (m_ImGuiOnRenderCallback)
 		m_ImGuiOnRenderCallback();
 
-	// ImGui::ShowDemoWindow();
-
 	ImGui::Render();
-	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+	// Make sure s_RTImGuiDrawData is not in use
+	CopyDrawData(ImGui::GetDrawData());
+
+	Renderer::Submit([]()
+	{
+		ImGui_ImplOpenGL3_RenderDrawData(s_RTImGuiDrawData);
+	});
 
 	// Update and Render additional Platform Windows
 	// (Platform functions may change the current OpenGL context, so we save/restore it to make it easier to paste this code elsewhere.

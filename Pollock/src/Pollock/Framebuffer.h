@@ -1,8 +1,9 @@
 #pragma once
 
 #include <stdint.h>
+#include "Base.h"
 
-class Framebuffer
+class Framebuffer : public RefCounted
 {
 public:
 	Framebuffer(uint32_t width, uint32_t height);
@@ -20,4 +21,5 @@ private:
 	uint32_t m_ColorBufferRendererID, m_DepthBufferRendererID;
 
 	void Invalidate();
+	void RT_Invalidate();
 };

@@ -6,6 +6,7 @@
 class Explorer
 {
 public:
+	Explorer() = default;
 	Explorer(const std::string& rootDir);
 
 	void OnImGuiRender();

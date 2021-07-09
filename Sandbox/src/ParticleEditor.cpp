@@ -82,7 +82,7 @@ void ParticleEditor::OnImGuiDraw()
 		else {
 			if (!m_CheckerboardTexture) {
 				TextureProperties props = { TextureFilter::Nearest, TextureWrap::Clamp };
-				m_CheckerboardTexture = std::make_shared<Texture2D>("assets/editor/Checkerboard.tga", props);
+				m_CheckerboardTexture = Ref<Texture2D>::Create("assets/editor/Checkerboard.tga", props);
 			}
 			ImGui::Image((ImTextureID)m_CheckerboardTexture->GetRendererID(), { 96, 96 }, { 0, 1 }, { 1, 0 });
 		}
@@ -97,7 +97,7 @@ void ParticleEditor::OnImGuiDraw()
 				TextureSerializer deserializer;
 				deserializer.Deserialize(filepath);
 
-				m_ParticleInstances[m_index].Properties->Texture = deserializer.GetTexture().get();
+				m_ParticleInstances[m_index].Properties->Texture = deserializer.GetTexture().Raw();
 				if (deserializer.GetSubTexture()) {
 					m_ParticleInstances[m_index].Properties->Animation = std::make_shared<AnimationPlayer>(deserializer.GetSubTexture());
 				}
@@ -259,11 +259,11 @@ void ParticleEditor::AddParticleSystem()
 	m_index = m_ParticleInstances.size() - 1;
 }
 
-void ParticleEditor::SetAnimation(Ref<AnimationPlayer> animation)
+void ParticleEditor::SetAnimation(std::shared_ptr<AnimationPlayer> animation)
 {
 	if (m_ParticleInstances.size())
 	{
-		m_ParticleInstances[0].Properties->Texture = animation->GetTexture().get();
+		m_ParticleInstances[0].Properties->Texture = animation->GetTexture().Raw();
 		m_ParticleInstances[0].Properties->Animation = animation;
 	}
 }
