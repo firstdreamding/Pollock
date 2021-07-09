@@ -25,7 +25,7 @@ struct ParticleProperties
 	// Texture - is it animated?
 	//         - what do we actually render?
 	Texture2D* Texture = nullptr;
-	Ref<AnimationPlayer> Animation;
+	std::shared_ptr<AnimationPlayer> Animation;
 };
 
 class ParticleSystem
@@ -54,7 +54,7 @@ private:
 		float LifeSpan;
 		float LifeRemaining;
 
-		Ref<AnimationPlayer> Animation;
+		std::shared_ptr<AnimationPlayer> Animation;
 
 		bool Active = false;
 	};

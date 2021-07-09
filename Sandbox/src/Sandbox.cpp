@@ -23,11 +23,11 @@
 #include "Pollock/Explorer.h"
 
 static ParticleEditor particleEditor;
-static Ref<TextureEditor> textureEditor;
+static std::shared_ptr<TextureEditor> textureEditor;
 
 static Ref<Texture2D> s_MegaManTexture;
 
-static Ref<AnimationPlayer> s_AnimationPlayer;
+static std::shared_ptr<AnimationPlayer> s_AnimationPlayer;
 
 static void OnUpdate(float ts)
 {
@@ -40,7 +40,7 @@ static void OnUpdate(float ts)
 		s_AnimationPlayer->OnUpdate(ts);
 
 		Renderer::Begin();
-		Renderer::DrawTexturedQuad({ 2.0f, 0.0f }, { 1.0f, 1.0f }, s_AnimationPlayer->GetTexture().get(),
+		Renderer::DrawTexturedQuad({ 2.0f, 0.0f }, { 1.0f, 1.0f }, s_AnimationPlayer->GetTexture().Raw(),
 			s_AnimationPlayer->GetTextureCoords());
 		Renderer::End();
 	}
@@ -73,6 +73,12 @@ int main()
 	particleEditor.LoadFile(L"Smoke.particle");
 
 	textureEditor = std::make_shared<TextureEditor>();
+
+	char* block = new char[256];
+
+	Explorer* e = new (block) Explorer("");
+	Explorer* e1 = new (block + sizeof(Explorer)) Explorer("");
+
 
 	Camera& camera = application.GetCamera();
 	application.SetPostViewportDrawCallback([&](ImVec2 viewportSize)

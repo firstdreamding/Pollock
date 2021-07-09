@@ -13,7 +13,7 @@ public:
 
 	Ref<Texture2D> GetCurrentTexture() const { return m_CurrentTexture; }
 	Ref<SubTexture2D> GetAnimationTexture() const { return m_AnimationTexture; }
-	Ref<AnimationPlayer> GetAnimationPlayer() const { return m_AnimationPlayer; }
+	std::shared_ptr<AnimationPlayer> GetAnimationPlayer() const { return m_AnimationPlayer; }
 private:
 	Ref<Texture2D> m_CheckerboardTexture;
 	Ref<Texture2D> m_CurrentTexture;
@@ -22,5 +22,5 @@ private:
 	int m_Framerate = 15;
 
 	Ref<SubTexture2D> m_AnimationTexture;
-	Ref<AnimationPlayer> m_AnimationPlayer;
+	std::shared_ptr<AnimationPlayer> m_AnimationPlayer;
 };

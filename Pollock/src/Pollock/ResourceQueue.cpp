@@ -1,6 +1,7 @@
 #include "ResourceQueue.h"
 
 #include <iostream>
+#include "PollockMemory.h"
 
 ResourceQueue::ResourceQueue()
 {
@@ -28,6 +29,6 @@ void ResourceQueue::Update()
 	if (image)
 	{
 		std::cout << "ResourceQueue upload: " << image->GetPath() << std::endl;
-		m_LoadedTextures[image->GetPath()] = new Texture2D(image);
+		m_LoadedTextures[image->GetPath()] = pnew Texture2D(image);
 	}
 }

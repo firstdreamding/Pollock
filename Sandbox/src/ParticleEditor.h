@@ -22,7 +22,6 @@
 #include "Pollock/Camera.h"
 #include <fstream>
 
-
 class ParticleEditor
 {
 public:
@@ -38,7 +37,7 @@ public:
 
 	void AddParticleSystem();
 
-	void SetAnimation(Ref<AnimationPlayer> animation);
+	void SetAnimation(std::shared_ptr<AnimationPlayer> animation);
 private:
 	std::vector<ParticleInstance> m_ParticleInstances;
 	Ref<Texture2D> m_CheckerboardTexture;

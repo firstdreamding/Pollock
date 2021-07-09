@@ -2,10 +2,14 @@
 
 #include <glm/glm.hpp>
 
+#include <functional>
+
 #include "Camera.h"
 #include "Texture.h"
 
 #include "ResourceQueue.h"
+#include "Timer.h"
+#include "Utils/Instrumentor.h"
 
 struct Vertex
 {
@@ -18,6 +22,26 @@ struct Vertex
 class Renderer
 {
 public:
+	using RenderCommandFn = std::function<void()>;
+
+	static void Submit(const RenderCommandFn& func)
+	{
+		auto& queue = s_RenderCommandQueue[s_RenderCommandQueueSubmissionIndex];
+		queue.emplace_back(func);
+	}
+
+	static void SwapQueues()
+	{
+		s_RenderCommandQueueSubmissionIndex = (s_RenderCommandQueueSubmissionIndex + 1) % s_RenderCommandQueueCount;
+	}
+
+	static uint32_t GetRenderQueueIndex()
+	{
+		return (s_RenderCommandQueueSubmissionIndex + 1) % s_RenderCommandQueueCount;
+	}
+
+	static void ExecuteRenderCommandQueue();
+
 	static void Init();
 	static void OnWindowResize(uint32_t width, uint32_t height);
 
@@ -39,4 +63,8 @@ public:
 	static void DrawRotatedTexturedQuad(const glm::vec2& position, const glm::vec2& size, float rotationRadians, Texture2D* texture, const glm::vec4& color = { 1.0f, 1.0f, 1.0f, 1.0f });
 	static void DrawRotatedTexturedQuad(const glm::vec2& position, const glm::vec2& size, float rotationRadians, Texture2D* texture, const glm::vec2* texCoords, const glm::vec4& color = { 1.0f, 1.0f, 1.0f, 1.0f });
 	static void End();
+private:
+	constexpr static uint32_t s_RenderCommandQueueCount = 2;
+	inline static std::vector<RenderCommandFn> s_RenderCommandQueue[s_RenderCommandQueueCount];
+	inline static std::atomic<uint32_t> s_RenderCommandQueueSubmissionIndex = 0;
 };

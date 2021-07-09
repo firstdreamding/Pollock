@@ -49,12 +49,12 @@ void TextureSerializer::Deserialize(const std::string& filepath)
 
 	YAML::Node textureRoot = YAML::Load(strStream.str());
 
-	m_Texture.reset();
-	m_SubTexture.reset();
+	m_Texture = nullptr;
+	m_SubTexture = nullptr;
 
 	if (textureRoot["Filter"] && textureRoot["AssetPath"]) {
 		TextureProperties props = { (TextureFilter)textureRoot["Filter"].as<int>(), TextureWrap::Clamp };
-		m_Texture = std::make_shared<Texture2D>(textureRoot["AssetPath"].as<std::string>(), props);
+		m_Texture = Ref<Texture2D>::Create(textureRoot["AssetPath"].as<std::string>(), props);
 	}
 
 	if (textureRoot["SubTexture"]) {
@@ -65,7 +65,7 @@ void TextureSerializer::Deserialize(const std::string& filepath)
 			int horizontalCount = subTextureRoot["HorizontalSpriteCount"].as<int>();
 			int verticalCount = subTextureRoot["VerticalSpriteCount"].as<int>();
 			int framerate = subTextureRoot["FrameRate"].as<int>();
-			m_SubTexture = std::make_shared<SubTexture2D>(m_Texture, horizontalCount, verticalCount, framerate);
+			m_SubTexture = Ref<SubTexture2D>::Create(m_Texture, horizontalCount, verticalCount, framerate);
 		}
 	}
 }

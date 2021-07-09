@@ -10,6 +10,8 @@
 
 #include "Instrumentor.h"
 
+#include "Ref.h"
+
 using namespace std::chrono_literals;
 
 static HANDLE s_RenderSignal;
@@ -127,8 +129,25 @@ static void RenderThread()
 	}
 }
 
+class Shader : public RefCounted
+{
+public:
+	Shader()
+	{
+		std::cout << "Created Shader!\n";
+	}
+
+	~Shader()
+	{
+		std::cout << "Destroyed Shader!\n";
+	}
+
+	void Func() { std::cout << "Func!\n"; }
+};
+
 int main()
 {
+#if 0
 	Instrumentor::Get().BeginSession("MultiThreadedExample");
 
 	s_RenderSignal = CreateEvent(NULL, FALSE, FALSE, "RenderSignal");
@@ -138,6 +157,16 @@ int main()
 	AppThread();
 
 	renderThread.join();
+#endif
 
-
+	Ref<Shader> shaderAlive;
+	{
+		std::cout << "Start Scope\n";
+		Ref<Shader> shader = Ref<Shader>::Create();
+		shader->Func();
+		(*shader).Func();
+		shaderAlive = shader;
+	}
+	std::cout << "End Scope\n";
+	system("PAUSE");
 }

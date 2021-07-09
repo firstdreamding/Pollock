@@ -62,7 +62,7 @@ private:
 	uint32_t m_ViewportWidth = 0, m_ViewportHeight = 0;
 
 	std::unique_ptr<Window> m_Window;
-	std::unique_ptr<Framebuffer> m_Framebuffer;
+	Ref<Framebuffer> m_Framebuffer;
 
 	std::vector<std::function<void()>> m_PostRenderQueue;
 

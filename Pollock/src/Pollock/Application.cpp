@@ -46,13 +46,12 @@ Application::Application(const std::string& name, uint32_t width, uint32_t heigh
 		SetCameraProjection(m_Camera, m_ViewportWidth, m_ViewportHeight, m_CameraZoom);
 	});
 
-	
 	m_Window->SetOnImGuiRenderCallback([&]() { OnImGuiRender(); });
 
 	Renderer::Init();
 	Random::Init();
 
-	m_Framebuffer = std::make_unique<Framebuffer>(width, height);
+	m_Framebuffer = Ref<Framebuffer>::Create(width, height);
 }
 
 Application::~Application()
@@ -112,6 +111,9 @@ void Application::Run()
 		//Renderer::DrawQuad({ -0.5f, -0.5f }, { 0.8f, 0.2f, 0.8f });
 
 		m_Framebuffer->Unbind();
+
+		Renderer::ExecuteRenderCommandQueue();
+
 		m_Window->Update();
 
 		for (auto& func : m_PostRenderQueue)

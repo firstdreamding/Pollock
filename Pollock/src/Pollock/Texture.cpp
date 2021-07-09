@@ -7,6 +7,8 @@
 
 #include "Timer.h"
 
+#include "Renderer.h"
+
 static GLenum PollockFilterToGLFilter(TextureFilter filter)
 {
 	switch (filter)
@@ -34,83 +36,49 @@ static GLenum PollockWrapToGLWrap(TextureWrap wrap)
 Texture2D::Texture2D(const std::string& path, const TextureProperties& textureProperties)
 	: m_Path(path), m_Properties(textureProperties), m_Filter(textureProperties.Filter)
 {
-	int width, height, bpp;
-
-	stbi_set_flip_vertically_on_load(1);
-	stbi_uc* data = nullptr;
-	{
-		ScopedTimer timer("Loading image file '" + path + "'");
-		data = stbi_load(path.c_str(), &width, &height, &bpp, STBI_rgb_alpha);
-	}
-
-	if (!data)
-	{
-		std::cout << "Could not load texture " << path << std::endl;
-		return;
-	}
-
-	m_Width = width;
-	m_Height = height;
-
-	{
-		ScopedTimer timer("Uploading texture '" + path + "'");
-		glGenTextures(1, &m_RendererID);
-		glBindTexture(GL_TEXTURE_2D, m_RendererID);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-
-		GLenum filter = PollockFilterToGLFilter(m_Properties.Filter);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
-
-		GLenum wrap = PollockWrapToGLWrap(m_Properties.Wrap);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, wrap);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap);
-
-		glBindTexture(GL_TEXTURE_2D, 0);
-	}
-
-	stbi_image_free(data);
+	m_Image = Ref<Image2D>::Create(path);
+	Invalidate();
 }
 
-Texture2D::Texture2D(Image2D* image, const TextureProperties& textureProperties /*= TextureProperties()*/)
-	: m_Path(image->m_Path), m_Properties(textureProperties)
+Texture2D::Texture2D(Ref<Image2D> image, const TextureProperties& textureProperties)
+	: m_Image(image), m_Path(image->m_Path), m_Properties(textureProperties)
 {
-	m_Width = image->m_Width;
-	m_Height = image->m_Height;
+	Invalidate();
+}
 
-	{
-		ScopedTimer timer("Uploading texture '" + image->m_Path + "'");
-		glGenTextures(1, &m_RendererID);
-		glBindTexture(GL_TEXTURE_2D, m_RendererID);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_Width, m_Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image->m_Data);
-
-		GLenum filter = PollockFilterToGLFilter(m_Properties.Filter);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
-
-		GLenum wrap = PollockWrapToGLWrap(m_Properties.Wrap);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, wrap);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap);
-
-		glBindTexture(GL_TEXTURE_2D, 0);
-	}
+Texture2D::Texture2D(uint32_t width, uint32_t height, const void* data)
+	: m_Image(Ref<Image2D>::Create(width, height))
+{
+	m_LocalStorage = new uint8_t[width * height * 4];
+	memcpy(m_LocalStorage, data, width * height * 4);
+	Invalidate();
 }
 
 Texture2D::~Texture2D()
 {
-	glDeleteTextures(1, &m_RendererID);
+	Renderer::Submit([rendererID = m_RendererID]()
+	{
+		glDeleteTextures(1, &rendererID);
+	});
 }
 
 void Texture2D::Bind(uint32_t slot)
 {
-	glBindTextureUnit(slot, m_RendererID);
+	Ref<Texture2D> instance = this;
+	Renderer::Submit([instance, slot]()
+	{
+		glBindTextureUnit(slot, instance->m_RendererID);
+	});
 }
 
 void Texture2D::Unbind()
 {
-	glBindTextureUnit(0, m_RendererID);
+	__debugbreak();
+
+	Renderer::Submit([]()
+	{
+		glBindTextureUnit(0, 0);
+	});
 }
 
 void Texture2D::SetFilter(TextureFilter filter)
@@ -121,6 +89,46 @@ void Texture2D::SetFilter(TextureFilter filter)
 
 	glTextureParameteri(m_RendererID, GL_TEXTURE_MIN_FILTER, glFilter);
 	glTextureParameteri(m_RendererID, GL_TEXTURE_MAG_FILTER, glFilter);
+}
+
+void Texture2D::Invalidate()
+{
+	Ref<Texture2D> instance = this;
+	Renderer::Submit([instance]() mutable
+	{
+		instance->RT_Invalidate();
+	});
+}
+
+void Texture2D::RT_Invalidate()
+{
+	if (m_Image->GetData<void>())
+	{
+		ScopedTimer timer("Uploading texture '" + m_Image->m_Path + "'");
+		glGenTextures(1, &m_RendererID);
+		glBindTexture(GL_TEXTURE_2D, m_RendererID);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_Image->m_Width, m_Image->m_Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_Image->m_Data);
+		glBindTexture(GL_TEXTURE_2D, 0);
+		m_Image->Release();
+	}
+	else
+	{
+		glCreateTextures(GL_TEXTURE_2D, 1, &m_RendererID);
+		glTextureStorage2D(m_RendererID, 1, GL_RGBA8, m_Image->m_Width, m_Image->m_Height);
+		glTextureSubImage2D(m_RendererID, 0, 0, 0, m_Image->m_Width, m_Image->m_Height, GL_RGBA, GL_UNSIGNED_BYTE, m_LocalStorage);
+
+		delete[] m_LocalStorage;
+		m_LocalStorage = nullptr;
+	}
+
+	GLenum filter = PollockFilterToGLFilter(m_Properties.Filter);
+	glTextureParameteri(m_RendererID, GL_TEXTURE_MIN_FILTER, filter);
+	glTextureParameteri(m_RendererID, GL_TEXTURE_MAG_FILTER, filter);
+
+	GLenum wrap = PollockWrapToGLWrap(m_Properties.Wrap);
+	glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_R, wrap);
+	glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_S, wrap);
+	glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_T, wrap);
 }
 
 SubTexture2D::SubTexture2D(const Ref<Texture2D>& texture, int horizontalSpriteCount, int verticalSpriteCount, int framerate)
@@ -182,7 +190,18 @@ Image2D::Image2D(const std::string& path)
 	m_Height = height;
 }
 
+Image2D::Image2D(uint32_t width, uint32_t height)
+	: m_Width(width), m_Height(height)
+{
+}
+
 Image2D::~Image2D()
 {
+	Release();
+}
+
+void Image2D::Release()
+{
 	stbi_image_free(m_Data);
+	m_Data = nullptr;
 }

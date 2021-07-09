@@ -14,7 +14,7 @@ extern std::unordered_map<std::string, Image2D*> g_LoadedImages;
 TextureEditor::TextureEditor()
 {
 	TextureProperties props = { TextureFilter::Nearest, TextureWrap::Clamp };
-	m_CheckerboardTexture = std::make_shared<Texture2D>("assets/editor/Checkerboard.tga", props);
+	m_CheckerboardTexture = Ref<Texture2D>::Create("assets/editor/Checkerboard.tga", props);
 }
 
 TextureEditor::~TextureEditor()
@@ -52,7 +52,7 @@ void TextureEditor::OnImGuiRender()
 			auto& rq = Renderer::GetResourceQueue();
 			Texture2D* texture = rq.GetTexture(filepath);
 			if (texture)
-				m_CurrentTexture = std::shared_ptr<Texture2D>(texture);
+				m_CurrentTexture = texture;
 #endif
 
 		}
@@ -78,7 +78,7 @@ void TextureEditor::OnImGuiRender()
 			if (!filepath.empty())
 			{
 				TextureProperties props = { TextureFilter::Linear, TextureWrap::Clamp };
-				m_CurrentTexture = std::make_shared<Texture2D>(filepath, props);
+				m_CurrentTexture = Ref<Texture2D>::Create(filepath, props);
 			}
 		}
 	}
@@ -128,7 +128,7 @@ void TextureEditor::OnImGuiRender()
 			ImGui::DragInt("Horizontal Sprite Count", &m_HorizontalSpriteCount);
 			if (ImGui::Button("Create Sub-Texture"))
 			{
-				m_AnimationTexture = std::make_shared<SubTexture2D>(m_CurrentTexture, m_VerticalSpriteCount, m_HorizontalSpriteCount, m_Framerate);
+				m_AnimationTexture = Ref<SubTexture2D>::Create(m_CurrentTexture, m_VerticalSpriteCount, m_HorizontalSpriteCount, m_Framerate);
 				m_AnimationPlayer = std::make_shared<AnimationPlayer>(m_AnimationTexture);
 			}
 		}
@@ -168,7 +168,7 @@ void TextureEditor::OnImGuiRender()
 	if (m_AnimationPlayer) {
 		if (ImGui::Button("Delete sub-texture")) {
 			m_AnimationPlayer.reset();
-			m_AnimationTexture.reset();
+			m_AnimationTexture = nullptr;
 		}
 	}
 

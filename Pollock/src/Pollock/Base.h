@@ -2,5 +2,4 @@
 
 #include <memory>
 
-template<typename T>
-using Ref = std::shared_ptr<T>;
+#include "Pollock/Core/Ref.h"

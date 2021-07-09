@@ -15,6 +15,8 @@
 #include "Application.h"
 #include "Renderer.h"
 
+#include "PollockMemory.h"
+
 static std::queue<std::string> s_ImageLoadQueue;
 std::unordered_map<std::string, Image2D*> g_LoadedImages;
 
@@ -56,7 +58,7 @@ static void LoadingThread()
 		while (!imageQueue.empty())
 		{
 			auto& path = imageQueue.front();
-			Image2D* image = new Image2D(path);
+			Image2D* image = pnew Image2D(path);
 			Renderer::GetResourceQueue().UploadTexture(image);
 			g_LoadedImages[path] = image;
 			imageQueue.pop();
